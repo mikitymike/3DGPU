@@ -1,7 +1,7 @@
 package defines_package
 
-
-
+parameter HEIGHT = 480;
+parameter WIDTH = 640;
 
 typedef struct packed {
 	byte r, g, b;

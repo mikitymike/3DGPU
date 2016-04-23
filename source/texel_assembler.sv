@@ -75,7 +75,7 @@ module texel_assembler
 	  else
 	    nextstate = T6;
 	READ_WAIT:
-	  if (texel_read == 1'b0)
+	  if (texel_read == 1'b1)
 	    nextstate = IDLE;
 	  else
 	    nextstate = READ_WAIT;

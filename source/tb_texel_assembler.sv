@@ -43,6 +43,7 @@ module tb_texel_assembler();
    reg 	      tb_expected_ahb_user_read_buffer;
    reg [167:0] tb_expected_texel_buffer;
    reg 	       tb_expected_texel_ready;
+   reg [167:0] texel_word;
    
    // DUT portmap
    texel_assembler DUT
@@ -88,11 +89,9 @@ module tb_texel_assembler();
       end
    endtask // send_byte
    
-   task check_outputs;
+   task check_texel_buffer;
       input       [167:0] expected_texel_buffer;
-      input 		expected_texel_ready;
-      input 		expected_ahb_user_read_buffer;
-      
+
       begin
 	 assert(expected_texel_buffer == tb_texel_buffer)
 	   $info("Test case %0d: Correct texel_buffer Output", tb_test_case);
@@ -100,19 +99,26 @@ module tb_texel_assembler();
            $error("Test case %0d: Incorrect texel_buffer Output", tb_test_case);
            $error("Expected %0d, got %0d", expected_texel_buffer, tb_texel_buffer);
          end
-	 
+      end
+   endtask // assert
+
+   task check_flags;
+      input 		expected_texel_ready;
+      input 		expected_ahb_user_read_buffer;
+
+      begin
 	 assert(expected_texel_ready == tb_texel_ready)
 	   $info("Test case %0d: Correct texel_ready Output", tb_test_case);
 	 else begin
-	   $error("Test case %0d: Incorrect texel_ready Output", tb_test_case);
-	   $error("Expected %0d, got %0d", expected_texel_ready, tb_texel_ready);
+	    $error("Test case %0d: Incorrect texel_ready Output", tb_test_case);
+	    $error("Expected %0d, got %0d", expected_texel_ready, tb_texel_ready);
 	 end
-
+	 
 	 assert(expected_ahb_user_read_buffer == tb_ahb_user_read_buffer)
 	   $info("Test case %0d: Correct read_buffer Output", tb_test_case);
          else begin
-           $error("Test case %0d: Incorrect read_buffer Output", tb_test_case);
-           $error("Expected %0d, got %0d", expected_ahb_user_read_buffer, tb_ahb_user_read_buffer);
+            $error("Test case %0d: Incorrect read_buffer Output", tb_test_case);
+            $error("Expected %0d, got %0d", expected_ahb_user_read_buffer, tb_ahb_user_read_buffer);
          end
       end
    endtask
@@ -149,17 +155,24 @@ module tb_texel_assembler();
 	   @(negedge tb_clk);
 	   
 	   data_test_vector = {FRAME_START, 32'd1, 32'd2, 32'd3, 32'd4, 32'd5, 32'd6, FRAME_END};
-	   	   	   
+	   texel_word = {data_test_vector[1],data_test_vector[2],data_test_vector[3],data_test_vector[4],data_test_vector[5]};
+	   
 	   for(i=0; i<8; i=i+1) begin
 	      tb_test_case += 1;
 	      tb_ahb_buffer = data_test_vector[8-i];
 	      tb_ahb_data_available = 1'b1;	      
+	      check_flags(1'b0, 1'b1);
 	      @(negedge tb_clk);
 	   end
+	   check_texel_buffer(texel_word);
+	   check_flags(1'b1, 1'b0);
 
-	   check_outputs(tb_expected_texel_buffer, 1'b1, 1'b0);
+	   tb_texel_read = 1'b1;
+	   	   
+	   @(negedge tb_clk);
 	   
-	   
+	   check_flags(1'b0, 1'b1);
+	   	   
 	end // block: TEST_PROC
    
 endmodule

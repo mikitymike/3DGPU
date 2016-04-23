@@ -17,6 +17,9 @@ module bresen
 	input wire start,
 	input Point2D p,
 	input Point2D q,
+	output wire write_en,
+	output wire wf_data,
+	output wire [(WIREFRAME_ADDR_SIZE-1):0] addr,
 	output wire done
 );
 
@@ -47,16 +50,19 @@ always_comb begin
 			end
 		end
 		SETUP: begin
+			next_state = WRITE;
 			D = dy - dx;
 			x = p.x;
 			y = p.y;
-			next_state = WRITE;
 		end
 		WRITE: begin
 			next_state = STEP;
-			// assign to SRAM here
+			write_en = 1;
+			wf_data = 1;
+			addr = [y*WIDTH + x]; // probably doesn't work
 		end
 		STEP: begin
+			next_state = CHECK;
 			if(D >= 0) begin
 				y = y + 1;
 				D = D - dx;

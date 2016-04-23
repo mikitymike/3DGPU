@@ -20,6 +20,10 @@ module rasterizer
 
 	output Triangle3D o_triangle,
 	output Color o_color,
+
+	output wire write_en,
+	output wire wf_data,
+	output wire [(WIREFRAME_ADDR_SIZE-1):0] addr,
 	
 	output wire done
 );
@@ -57,6 +61,9 @@ bresen BRESEN(
 		.start(bresen_start),
 		.p(p),
 		.q(q),
+		.write_en(write_en),
+		.wf_data(wf_data),
+		.addr(addr),
 		.done(bresen_done)
 	     );
 

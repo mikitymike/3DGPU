@@ -26,7 +26,7 @@ module texel_assembler
    
    typedef enum bit [3:0] {IDLE, T1, T2, T3, T4, T5, T6, READ_WAIT, END_CHK} states;
 
-   assign texel_buffer = {buffer[5], buffer[4], buffer[3], buffer[2], buffer[1], buffer[0]};
+   assign texel_buffer = {buffer[5][7:0], buffer[4], buffer[3], buffer[2], buffer[1], buffer[0]};
    
    states state, nextstate;
    

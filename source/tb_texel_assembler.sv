@@ -154,25 +154,43 @@ module tb_texel_assembler();
 	   //Main Tests
 	   @(negedge tb_clk);
 	   
-	   data_test_vector = {FRAME_START, 32'd1, 32'd2, 32'd3, 32'd4, 32'd5, 32'd6, FRAME_END};
-	   texel_word = {data_test_vector[1],data_test_vector[2],data_test_vector[3],data_test_vector[4],data_test_vector[5]};
+	   data_test_vector = {FRAME_START, 32'h33221100, 32'h77665544, 32'hBBAA9988, 32'hFFEEDDCC, 32'h76543210, 32'hFEDBCA98, FRAME_END};
+	   
 	   
 	   for(i=0; i<8; i=i+1) begin
 	      tb_test_case += 1;
 	      tb_ahb_buffer = data_test_vector[8-i];
-	      tb_ahb_data_available = 1'b1;	      
-	      check_flags(1'b0, 1'b1);
+	      tb_ahb_data_available = 1'b1;
+	      tb_expected_texel_ready = 1'b0;
+	      tb_expected_ahb_user_read_buffer = 1'b1;
+	      check_flags(tb_expected_texel_ready,tb_expected_ahb_user_read_buffer);
 	      @(negedge tb_clk);
 	   end
-	   check_texel_buffer(texel_word);
-	   check_flags(1'b1, 1'b0);
 
+	   tb_expected_texel_buffer = {data_test_vector[1][7:0],data_test_vector[2],data_test_vector[3],data_test_vector[4],data_test_vector[5],data_test_vector[6]};
+	   check_texel_buffer(tb_expected_texel_buffer);
+	   tb_expected_texel_ready = 1'b1;
+	   tb_expected_ahb_user_read_buffer = 1'b0;
+	   check_flags(1'b1, 1'b0);
+	   check_flags(tb_expected_texel_ready,tb_expected_ahb_user_read_buffer);
+
+	   @(negedge tb_clk);
+	   @(negedge tb_clk);
+	   @(negedge tb_clk);
+	   @(negedge tb_clk);
+	   @(negedge tb_clk);
+	   
+	   check_flags(tb_expected_texel_ready,tb_expected_ahb_user_read_buffer);
+	   
 	   tb_texel_read = 1'b1;
 	   	   
 	   @(negedge tb_clk);
+
+	   tb_texel_read = 1'b0;
 	   
-	   check_flags(1'b0, 1'b1);
-	   	   
+	   tb_expected_texel_ready = 1'b0;
+	   tb_expected_ahb_user_read_buffer = 1'b1;
+	   check_flags(tb_expected_texel_ready,tb_expected_ahb_user_read_buffer);	   
 	end // block: TEST_PROC
    
 endmodule

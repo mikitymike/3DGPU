@@ -8,9 +8,12 @@
 
 `timescale 1ns / 10ps
 
-module tb_usb_receiver();
+module tb_texel_assembler();
       
    // Define parameters
+   parameter FRAME_START = 32'd0;
+   parameter FRAME_END = 32'd1;
+
    parameter CLK_PERIOD				= 2.5;
    parameter NORM_DATA_PERIOD	= (10 * CLK_PERIOD);
    
@@ -19,46 +22,38 @@ module tb_usb_receiver();
    //  DUT inputs
    reg tb_clk;
    reg tb_n_rst;
-   reg tb_d_plus;
-   reg tb_d_minus;
-   reg tb_r_enable; 
+   reg [31:0] ahb_buffer;
+   reg 	      ahb_data_available;
+   reg 	      texel_read;
    integer i;
    	
    // DUT outputs
-   reg 	    tb_rcving;
-   reg 	     tb_r_error;
-   wire [7:0] tb_r_data;
-   wire       tb_empty;
-   wire       tb_full;
+   wire    ahb_user_read_buffer;
+   wire [167:0] texel_buffer;
+   wire 	texel_ready;
    
    // Test bench debug signals
    // Overall test case number for reference
    integer tb_test_case;
    
    // Test case 'inputs' used for test stimulus
-   reg [7:0] data_test_vector [0:7];
+   reg [31:0] data_test_vector [7:0];
    
    // Test case expected output values for the test case
-   reg [7:0] tb_expected_r_data;
-   reg 	     tb_expected_empty;
-   reg 	     tb_expected_full;
-   reg 	     tb_expected_rcving;
-   reg 	     tb_expected_r_error;
-   reg [7:0] tb_temp_data;
-         
+   reg 	      tb_expected_ahb_user_read_buffer;
+   reg [167:0] tb_expected_texel_buffer;
+   reg 	       tb_expected_texel_ready;
+   
    // DUT portmap
-   usb_receiver DUT
+   texel_assembler DUT
      (
       .clk(tb_clk),
       .n_rst(tb_n_rst),
-      .d_plus(tb_d_plus),
-      .d_minus(tb_d_minus),
-      .r_data(tb_r_data),
-      .full(tb_full),
-      .empty(tb_empty),
-      .r_enable(tb_r_enable),
-      .rcving(tb_rcving),
-      .r_error(tb_r_error)
+      .ahb_buffer(tb_ahb_buffer),
+      .texel_read(tb_texel_read),
+      .ahb_user_read_buffer(tb_ahb_user_read_buffer),
+      .texel_buffer(tb_texel_buffer),
+      .texel_ready(tb_texel_ready)
       );
    
   
@@ -84,69 +79,39 @@ module tb_usb_receiver();
       end
    endtask // reset_dut
    
-   task send_bit;
-      input logic bit_val;
+   task ahb_send_word;
+      input logic [31:0] word_val;
       begin
-	 tb_d_plus = bit_val == 1'b1 ? tb_d_plus : !tb_d_plus;
-	 tb_d_minus = !tb_d_plus;
-      end
-   endtask // send_bit
-
-   task send_byte;
-      input logic [7:0] byte_val;
-      begin
-	 foreach(byte_val[j]) begin
-	    send_bit(byte_val[j]);
-	    @(negedge tb_clk);
-	    @(negedge tb_clk);
-	    @(negedge tb_clk);
-	    @(negedge tb_clk);
-	    @(negedge tb_clk);
-	    @(negedge tb_clk);
-	    @(negedge tb_clk);
-	    @(negedge tb_clk);
-	 end
+	 tb_ahb_buffer = word_val;
+	 tb_ahb_data_available = 1'b1;
       end
    endtask // send_byte
    
-   task send_eop;
-      begin
-	 tb_d_plus = 1'b0;
-	 tb_d_minus = 1'b0;
-	 @(negedge tb_clk);
-	 @(negedge tb_clk);
-	 tb_d_plus = 1'b1;
-	 @(negedge tb_clk);
-      end
-   endtask // send_eop
-   
    task check_outputs;
-      input       [7:0] expected_r_data;
-      input 		expected_empty;
-      input 		expected_full;
-
-      
+      input       [167:0] expected_texel_buffer;
+      input 		expected_texel_ready;
+      input 		expected_ahb_user_read_buffer;
       
       begin
-	 assert(expected_r_data == tb_r_data)
+	 assert(expected_texel_buffer == tb_texel_buffer)
 	   $info("Test case %0d: Correct r_data Output", tb_test_case);
          else begin
            $error("Test case %0d: Incorrect r_data Output", tb_test_case);
-           $error("Expected %0d, got %0d", expected_r_data, tb_r_data);
+           $error("Expected %0d, got %0d", expected_texel_buffer, tb_texel_buffer);
          end
 	 
-	 assert(expected_empty == tb_empty)
+	 assert(expected_texel_ready == tb_texel_ready)
 	   $info("Test case %0d: Correct empty Output", tb_test_case);
 	 else begin
 	   $error("Test case %0d: Incorrect empty Output", tb_test_case);
-	   $error("Expected %0d, got %0d", expected_empty, tb_empty);
+	   $error("Expected %0d, got %0d", expected_texel_ready, tb_texel_ready);
 	 end
 
-	 assert(expected_full == tb_full)
+	 assert(expected_ahb_user_buffer_ready == tb_ahb_user_buffer_ready)
 	   $info("Test case %0d: Correct full Output", tb_test_case);
          else begin
            $error("Test case %0d: Incorrect full Output", tb_test_case);
-           $error("Expected %0d, got %0d", expected_full, tb_full);
+           $error("Expected %0d, got %0d", expected_ahb_user_buffer_ready, tb_ahb_user_buffer_ready);
          end
       end
    endtask
@@ -165,10 +130,10 @@ module tb_usb_receiver();
 	   
 	   // Initilize all inputs to inactive/idle values
 	   tb_n_rst = 1'b1; // Initially inactive
-	   tb_d_plus = 1'b1;
-	   tb_d_minus = 1'b0;
-	   tb_r_enable = 1'b0;
-	   
+	   tb_ahb_buffer = 1'b0;
+	   tb_ahb_data_available = 1'b0;
+	   tb_texel_read = 1'b0;
+	   	   
 	   // Test case 0: Basic Power on Reset
 	   tb_test_case = 0;
 	   
@@ -176,55 +141,23 @@ module tb_usb_receiver();
 	   // Note: expected outputs should all be inactive/idle values
 	   // For a good packet RX Data value should match data sent
 
-	   
-	   	   
 	   // DUT Reset
 	   reset_dut;
-	  	  	   	   
 	  	  
 	   //Main Tests
 	   @(negedge tb_clk);
 	   
-	   data_test_vector = {8'b00000001,8'b00000000,8'b00111100,8'b00111000,8'b10011001,8'b11111110,8'b00101101,8'b00110011};
+	   data_test_vector = {FRAME_START, 32'd1, 32'd2, 32'd3, 32'd4, 32'd5 32'd6, FRAME_END};
 	   	   	   
 	   for(i=0; i<8; i=i+1) begin
 	      tb_test_case += 1;
-	      send_byte(data_test_vector[i]);
-	      tb_r_enable = 1'b1;
+	      tb_ahb_buffer = data_test_vector[i];
+	      tb_ahb_data_available = 1'b1;	      
 	      @(negedge tb_clk);
-	      tb_r_enable = 1'b0;
-	      @(negedge tb_clk);
-	      tb_temp_data = data_test_vector[i];
-	      foreach(tb_temp_data[k]) begin
-		 tb_expected_r_data[k] = tb_temp_data[7-k];
-	      end
-	      check_outputs(tb_expected_r_data, 1'b1, 1'b0);
-	      
-	   end // for (i=0; i<32; i=i+1)
+	   end
 
-	   @(negedge tb_clk);
-	   @(negedge tb_clk);
-	   send_eop;
-
-	   tb_test_case += 1;
-	   send_byte(8'b00000001);
-	   	   	   
-	   tb_expected_r_error = 1'b1;
-	   @(negedge tb_clk);
-	   @(negedge tb_clk);
-	   @(negedge tb_clk);
-	   assert(tb_expected_r_error == tb_r_error)
-	   $info("Test case %0d: Correct error Output", tb_test_case);
-         else begin
-           $error("Test case %0d: Incorrect error Output", tb_test_case);
-           $error("Expected %0d, got %0d", tb_expected_r_error, tb_r_error);
-         end
-
-	   send_eop;
-
-	   tb_test_case += 1;
-
-	   send_byte(8'b00000001);
+	   check_outputs(tb_expected_texel_data, 1'b1, 1'b0);
+	   
 	   
 	end // block: TEST_PROC
    

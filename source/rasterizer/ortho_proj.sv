@@ -1,4 +1,9 @@
-import defines_package;
+/*
+	Orthogonal Projection of 3D coordinates to 2D.
+*/
+
+
+import defines_package::*;
 
 module ortho_proj
 (

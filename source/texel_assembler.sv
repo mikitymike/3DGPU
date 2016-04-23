@@ -25,6 +25,8 @@ module texel_assembler
    parameter FRAME_END = 32'd1;
    
    typedef enum bit [3:0] {IDLE, T1, T2, T3, T4, T5, T6, READ_WAIT, END_CHK} states;
+
+   assign texel_buffer = {buffer[5], buffer[4], buffer[3], buffer[2], buffer[1], buffer[0]};
    
    states state, nextstate;
    
@@ -38,32 +40,54 @@ module texel_assembler
    always_comb begin
       case (state)
 	IDLE:
-	  if (ahb_buffer == FRAME_START)
+	  if ((ahb_buffer == FRAME_START) && (ahb_data_available == 1'b1))
 	    nextstate = T1;
 	  else
 	    nextstate = IDLE;
 	T1:
-	  nextstate = T2;
+	  if(ahb_data_available)
+	    nextstate = T2;
+	  else
+	    nextstate = T1;
 	T2:
-	  nextstate = T3;
+	    if(ahb_data_available)
+	    nextstate = T3;
+	  else
+	    nextstate = T2;
 	T3:
-	  nextstate = T4;
+	  if(ahb_data_available)
+	    nextstate = T4;
+	  else
+	    nextstate = T3;
 	T4:
-	  nextstate = T5;
+	  if(ahb_data_available)
+	    nextstate = T5;
+	  else
+	    nextstate = T4;
 	T5:
-	  nextstate = T6;
+	  if(ahb_data_available)
+	    nextstate = T6;
+	  else
+	    nextstate = T5;
 	T6:
-	  nextstate = READ_WAIT;
+	  if(ahb_data_available)
+	    nextstate = READ_WAIT;
+	  else
+	    nextstate = T6;
 	READ_WAIT:
 	  if (texel_read == 1'b0)
 	    nextstate = IDLE;
 	  else
 	    nextstate = READ_WAIT;
 	END_CHK:
-	  if (ahb_buffer == FRAME_END)
-	    nextstate = IDLE;
+	  if(ahb_data_available) begin
+	    if (ahb_buffer == FRAME_END)
+	      nextstate = IDLE;
+	    else
+	      nextstate = T1;
+	  end
 	  else
-	    nextstate = T1;
+	    nextstate = END_CHK;
 	default:
 	  nextstate = IDLE;
       endcase

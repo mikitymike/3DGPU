@@ -22,15 +22,15 @@ module tb_texel_assembler();
    //  DUT inputs
    reg tb_clk;
    reg tb_n_rst;
-   reg [31:0] ahb_buffer;
-   reg 	      ahb_data_available;
-   reg 	      texel_read;
+   reg [31:0] tb_ahb_buffer;
+   reg 	      tb_ahb_data_available;
+   reg 	      tb_texel_read;
    integer i;
    	
    // DUT outputs
-   wire    ahb_user_read_buffer;
-   wire [167:0] texel_buffer;
-   wire 	texel_ready;
+   wire    tb_ahb_user_read_buffer;
+   wire [167:0] tb_texel_buffer;
+   wire 	tb_texel_ready;
    
    // Test bench debug signals
    // Overall test case number for reference
@@ -50,6 +50,7 @@ module tb_texel_assembler();
       .clk(tb_clk),
       .n_rst(tb_n_rst),
       .ahb_buffer(tb_ahb_buffer),
+      .ahb_data_available(tb_ahb_data_available),
       .texel_read(tb_texel_read),
       .ahb_user_read_buffer(tb_ahb_user_read_buffer),
       .texel_buffer(tb_texel_buffer),
@@ -94,24 +95,24 @@ module tb_texel_assembler();
       
       begin
 	 assert(expected_texel_buffer == tb_texel_buffer)
-	   $info("Test case %0d: Correct r_data Output", tb_test_case);
+	   $info("Test case %0d: Correct texel_buffer Output", tb_test_case);
          else begin
-           $error("Test case %0d: Incorrect r_data Output", tb_test_case);
+           $error("Test case %0d: Incorrect texel_buffer Output", tb_test_case);
            $error("Expected %0d, got %0d", expected_texel_buffer, tb_texel_buffer);
          end
 	 
 	 assert(expected_texel_ready == tb_texel_ready)
-	   $info("Test case %0d: Correct empty Output", tb_test_case);
+	   $info("Test case %0d: Correct texel_ready Output", tb_test_case);
 	 else begin
-	   $error("Test case %0d: Incorrect empty Output", tb_test_case);
+	   $error("Test case %0d: Incorrect texel_ready Output", tb_test_case);
 	   $error("Expected %0d, got %0d", expected_texel_ready, tb_texel_ready);
 	 end
 
-	 assert(expected_ahb_user_buffer_ready == tb_ahb_user_buffer_ready)
-	   $info("Test case %0d: Correct full Output", tb_test_case);
+	 assert(expected_ahb_user_read_buffer == tb_ahb_user_read_buffer)
+	   $info("Test case %0d: Correct read_buffer Output", tb_test_case);
          else begin
-           $error("Test case %0d: Incorrect full Output", tb_test_case);
-           $error("Expected %0d, got %0d", expected_ahb_user_buffer_ready, tb_ahb_user_buffer_ready);
+           $error("Test case %0d: Incorrect read_buffer Output", tb_test_case);
+           $error("Expected %0d, got %0d", expected_ahb_user_read_buffer, tb_ahb_user_read_buffer);
          end
       end
    endtask
@@ -147,16 +148,16 @@ module tb_texel_assembler();
 	   //Main Tests
 	   @(negedge tb_clk);
 	   
-	   data_test_vector = {FRAME_START, 32'd1, 32'd2, 32'd3, 32'd4, 32'd5 32'd6, FRAME_END};
+	   data_test_vector = {FRAME_START, 32'd1, 32'd2, 32'd3, 32'd4, 32'd5, 32'd6, FRAME_END};
 	   	   	   
 	   for(i=0; i<8; i=i+1) begin
 	      tb_test_case += 1;
-	      tb_ahb_buffer = data_test_vector[i];
+	      tb_ahb_buffer = data_test_vector[8-i];
 	      tb_ahb_data_available = 1'b1;	      
 	      @(negedge tb_clk);
 	   end
 
-	   check_outputs(tb_expected_texel_data, 1'b1, 1'b0);
+	   check_outputs(tb_expected_texel_buffer, 1'b1, 1'b0);
 	   
 	   
 	end // block: TEST_PROC

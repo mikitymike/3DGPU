@@ -8,8 +8,8 @@ import defines_package::*;
 
 module ortho_proj
 (
-	input Triangle3D tri3;
-	output Triangle2D tri2;
+	input Triangle3D tri3,
+	output Triangle2D tri2
 );
 
 

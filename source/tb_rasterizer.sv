@@ -11,6 +11,8 @@ import defines_package::*;
 
 module tb_rasterizer
 ();
+	localparam CLK_PERIOD = 1;
+
 	
 	reg tb_clk;
 	reg tb_n_rst;
@@ -45,7 +47,7 @@ module tb_rasterizer
 			.write_en(tb_write_en),
 			.wf_data(tb_wf_data),
 			.addr(tb_addr),
-			.done(tb_done),
+			.done(tb_done)
 		);
 
 	

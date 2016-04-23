@@ -5,12 +5,7 @@
 	colorfill needs to know about it.
 */
 
-/*
-
-
-*/
-
-
+//`include "defines_package.sv"
 import defines_package::*;
 
 
@@ -19,17 +14,13 @@ module rasterizer
 	input wire clk,
 	input wire n_rst,
 	input wire start,
-	
 	input Triangle3D i_triangle,
 	input Color i_color,
-
 	output Triangle3D o_triangle,
 	output Color o_color,
-
 	output wire write_en,
 	output wire wf_data,
 	output wire [(WIREFRAME_ADDR_SIZE-1):0] addr,
-	
 	output wire done
 );
 

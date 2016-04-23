@@ -11,8 +11,8 @@ module rasterizer_controller
 	input wire clk,
 	input wire n_rst,
 	input wire start,
-	input Triange2D triangle;
-	input wire bresen_done;
+	input Triangle2D triangle,
+	input wire bresen_done,
 	
 	output Point2D p,
 	output Point2D q,
@@ -67,7 +67,7 @@ always_comb begin
 		SETUP3: begin
 			next_state = DRAW3;
 			p = triangle.r;
-			q = triangle.p
+			q = triangle.p;
 		end
 		DRAW3: begin
 			if(bresen_done) begin

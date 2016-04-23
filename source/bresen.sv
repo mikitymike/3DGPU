@@ -22,9 +22,8 @@ module bresen
 typedef enum logic [3:0] { IDLE, SETUP, PLOT, STEP, CHECK, DONE } State;
 
 State state, next_state;
-shortint dx, dy, err, e2, x, y;
+shortint pdx, pdy, dx, dy, err, e2, x, y;
 wire down, right;
-
 
 assign pdx = q.x - p.x;
 assign pdy = q.y - p.y;
@@ -32,7 +31,6 @@ assign right = ~(pdx[15]);
 assign dx = !right ? -pdx : pdx;
 assign down = ~(pdy[15]);
 assign dy = down ? -pdy : pdy;
-
 
 always_ff @ (posedge clk, negedge n_rst) begin
 	if(n_rst == 0) begin
@@ -42,7 +40,6 @@ always_ff @ (posedge clk, negedge n_rst) begin
 		state <= next_state;
 	end
 end
-
 
 always_comb begin
 	next_state = state;
@@ -94,12 +91,11 @@ always_comb begin
 		DONE: begin
 			next_state = IDLE;
 		end
+	endcase
 end
 
 assign done = (state == DONE);
-assign point.x = x;
-assign point.y = y;
+assign point = {x, y};
 assign plot = (state == PLOT);
-
 
 endmodule

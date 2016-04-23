@@ -45,7 +45,6 @@ module texel_assembler
    assign texel_color_out.g = buffer[4][31:24];
    assign texel_color_out.b = buffer[5][7:0];
    
-   
    states state, nextstate;
    
    always_ff @(posedge clk, negedge n_rst) begin

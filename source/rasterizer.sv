@@ -5,8 +5,8 @@
 	colorfill needs to know about it.
 */
 
-//`include "defines_package.sv"
-import defines_package::*;
+`include "defines_package.vh"
+//import defines_package::*;
 
 
 module rasterizer
@@ -20,7 +20,7 @@ module rasterizer
 	output Color o_color,
 	output wire write_en,
 	output wire wf_data,
-	output wire [(WIREFRAME_ADDR_SIZE-1):0] addr,
+	output wire [(`WIREFRAME_ADDR_SIZE-1):0] addr,
 	output wire done
 );
 

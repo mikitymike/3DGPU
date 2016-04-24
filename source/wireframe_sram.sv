@@ -5,8 +5,9 @@
 	memory.
 */
 
+`include "defines_package.vh"
 
-import defines_package::*;
+// import defines_package::*;
 
 
 module wireframe_sram
@@ -16,17 +17,17 @@ module wireframe_sram
 	input wire write_en,
 	input wire data_in,
 	input wire flip,
-	input wire [(WIREFRAME_ADDR_SIZE-1):0] write_addr,
-	input wire [(WIREFRAME_ADDR_SIZE-1):0] read_addr
+	input wire [(`WIREFRAME_ADDR_SIZE-1):0] write_addr,
+	input wire [(`WIREFRAME_ADDR_SIZE-1):0] read_addr
 	output reg data_out
 );
 
 reg write_buffer;
-reg ram0[0:((WIDTH+1)*HEIGHT)];
-reg ram1[0:((WIDTH+1)*HEIGHT)];
+reg ram0[0:(`WIDTH*`HEIGHT)];
+reg ram1[0:(`WIDTH*`HEIGHT)];
 
 always_ff @(posedge clk, negedge n_rst) begin
-	if(n_rst) begin
+	if(n_rst == 0) begin
 		write_buffer <= 0;
 	end
 	else if(write_en) begin

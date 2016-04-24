@@ -1,6 +1,7 @@
 
 
-import defines_package::*;
+//import defines_package::*;
+`include "defines_package.vh"
 
 
 module plot
@@ -9,13 +10,13 @@ module plot
 	input Point2D point,
 	output wire write_en,
 	output wire wf_data,
-	output wire [(WIREFRAME_ADDR_SIZE-1):0] addr
+	output wire [(`WIREFRAME_ADDR_SIZE-1):0] addr
 );
 
 
 assign write_en = plot;
 assign wf_data = 1;
-assign addr = point.y * WIDTH + point.x;
+assign addr = point.y * `WIDTH + point.x;
 
 
 endmodule

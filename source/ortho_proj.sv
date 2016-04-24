@@ -3,7 +3,8 @@
 */
 
 
-import defines_package::*;
+//import defines_package::*;
+`include "defines_package.vh"
 
 
 module ortho_proj

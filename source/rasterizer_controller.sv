@@ -3,7 +3,8 @@
 */
 
 
-import defines_package::*;
+`include "defines_package.vh"
+//import defines_package::*;
 
 
 module rasterizer_controller
@@ -40,9 +41,13 @@ always_comb begin
 			if(start) begin
 				next_state = CLEAR;
 			end
+			else begin
+				next_state = IDLE;
+			end
 		end
 		CLEAR: begin
-							
+			// TODO: make clear
+			next_state = SETUP1;				
 		end
 		SETUP1: begin
 			next_state = DRAW1;
@@ -52,6 +57,9 @@ always_comb begin
 		DRAW1: begin
 			if(bresen_done) begin
 				next_state = SETUP2;
+			end
+			else begin
+				next_state = DRAW1;
 			end
 		end
 		SETUP2: begin
@@ -63,6 +71,9 @@ always_comb begin
 			if(bresen_done) begin
 				next_state = SETUP3;
 			end
+			else begin
+				next_state = DRAW2;	
+			end			
 		end
 		SETUP3: begin
 			next_state = DRAW3;
@@ -72,6 +83,9 @@ always_comb begin
 		DRAW3: begin
 			if(bresen_done) begin
 				next_state = DONE;
+			end
+			else begin
+				next_state = DRAW3;
 			end
 		end
 		DONE: begin

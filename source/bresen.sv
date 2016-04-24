@@ -3,8 +3,8 @@
 */
 
 
-import defines_package::*;
-
+`include "defines_package.vh"
+//import defines_package::*;
 
 module bresen
 (
@@ -47,6 +47,9 @@ always_comb begin
 		IDLE: begin
 			if(start) begin
 				next_state = SETUP;
+			end
+			else begin
+				next_state = IDLE;
 			end
 		end
 		SETUP: begin
@@ -95,7 +98,8 @@ always_comb begin
 end
 
 assign done = (state == DONE);
-assign point = {x, y};
+assign point.x = x;
+assign point.y = y;
 assign plot = (state == PLOT);
 
 endmodule

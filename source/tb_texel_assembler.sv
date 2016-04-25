@@ -95,22 +95,22 @@ module tb_texel_assembler();
    endtask // send_byte
    
    task check_texel;
-      input expected_texel_vertices_out;
-      input expected_texel_color_out;
+      input Triangle3D expected_texel_vertices_out;
+      input Color expected_texel_color_out;
       			  
       begin
-	 assert(tb_expected_texel_vertices_out == tb_texel_vertices_out)
+	 assert(expected_texel_vertices_out == tb_texel_vertices_out)
 	   $info("Test case %0d: Correct texel_vertices Output", tb_test_case);
 	 else begin
             $error("Test case %0d: Incorrect texel_vertices Output", tb_test_case);
-	    $error("Expected %0d, got %0d", tb_expected_texel_vertices_out, tb_texel_vertices_out);
+	    $error("Expected %0d, got %0d", expected_texel_vertices_out, tb_texel_vertices_out);
 	 end
 	 
-	 assert(tb_expected_texel_color_out == tb_texel_color_out)
+	 assert(expected_texel_color_out == tb_texel_color_out)
 	   $info("Test case %0d: Correct texel_color Output", tb_test_case);
          else begin
 	    $error("Test case %0d: Incorrect texel_color Output", tb_test_case);
-	    $error("Expected %0d, got %0d", tb_expected_texel_color_out, tb_texel_color_out);
+	    $error("Expected %0d, got %0d", expected_texel_color_out, tb_texel_color_out);
 	 end
       end
    endtask

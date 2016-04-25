@@ -44,6 +44,9 @@ typedef struct packed {
 
 `endif
 
+
+// functions moved to z_interpolation package
+
 /*
 function shortint min3(shortint a, b, c);
 begin

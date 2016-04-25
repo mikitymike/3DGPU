@@ -1,26 +1,28 @@
 /*
 	Types and constants.	
-
 */
 
 
-package defines_package;
+//package defines_package;
+//parameter HEIGHT = 480;
+//parameter WIDTH = 640;
+//parameter WIREFRAME_ADDR_SIZE = 19;
 
-parameter HEIGHT = 480;
-parameter WIDTH = 640;
-parameter WIREFRAME_ADDR_SIZE = 19;
+
+`ifndef DEFINES_PACKAGE_VH
+`define DEFINES_PACKAGE_VH
+
+`define HEIGHT 480
+`define WIDTH  640
+`define WIREFRAME_ADDR_SIZE 19
 
 
 typedef struct packed {
-	byte r;
-	byte g;
-	byte b;
+	byte r, g, b;
 } Color;
 
 typedef struct packed {
-	shortint x;
-	shortint y;
-	shortint z;
+	shortint x, y, z;
 } Point3D;
 
 typedef struct packed {
@@ -40,9 +42,12 @@ typedef struct packed {
 	Point2D r;
 } Triangle2D;
 
+`endif
 
 
-/* Not sure if any of this works. */
+// functions moved to z_interpolation package
+
+/*
 function shortint min3(shortint a, b, c);
 begin
 	min3 = a < b ? (a < c ? a : c) : (b < c ? b : c);
@@ -86,6 +91,6 @@ begin
 	assign z_interpolation = (triangle.p.z * a1 + triangle.q.z * a2 + triangle.r.z * a3) / a;
 end
 endfunction
+*/
 
-
-endpackage
+//endpackage

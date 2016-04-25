@@ -6,6 +6,8 @@
 // Version:     1.0  Initial Design Entry
 // Description: Assembles 168-bit wide 3D triangles vertices + color from 32-bit words
 
+`include "defines_package.vh"
+
 module texel_assembler
   (
    input wire 	      clk,
@@ -14,7 +16,8 @@ module texel_assembler
    input wire 	      ahb_data_available,
    input wire 	      texel_read,
    output reg 	      ahb_user_read_buffer,
-   output reg [167:0] texel_buffer,
+   output Triangle3D         texel_vertices_out,
+   output Color              texel_color_out,
    output reg 	      texel_ready   
    );
 
@@ -26,7 +29,22 @@ module texel_assembler
    
    typedef enum bit [3:0] {IDLE, T1, T2, T3, T4, T5, T6, READ_WAIT, END_CHK} states;
 
-   assign texel_buffer = {buffer[5][7:0], buffer[4], buffer[3], buffer[2], buffer[1], buffer[0]};
+   assign texel_vertices_out.p.x = buffer[0][15:0];
+   assign texel_vertices_out.p.y = buffer[0][31:16];
+   assign texel_vertices_out.p.z = buffer[1][15:0];
+   
+   assign texel_vertices_out.q.x = buffer[1][31:16];
+   assign texel_vertices_out.q.y = buffer[2][15:0];
+   assign texel_vertices_out.q.z = buffer[2][31:16];
+   
+   assign texel_vertices_out.r.x = buffer[3][15:0];
+   assign texel_vertices_out.r.y = buffer[3][31:16];
+   assign texel_vertices_out.r.z = buffer[4][15:0];
+   
+   assign texel_color_out.r = buffer[4][23:16];
+   assign texel_color_out.g = buffer[4][31:24];
+   assign texel_color_out.b = buffer[5][7:0];
+   
    
    states state, nextstate;
    

@@ -7,6 +7,7 @@
 // Description: Texel Assembler Test Bench
 
 `timescale 1ns / 10ps
+`include "defines_package.vh"
 
 module tb_texel_assembler();
       
@@ -30,6 +31,8 @@ module tb_texel_assembler();
    // DUT outputs
    wire    tb_ahb_user_read_buffer;
    wire [167:0] tb_texel_buffer;
+   Triangle3D         tb_texel_vertices_out;
+   Color              tb_texel_color_out;
    wire 	tb_texel_ready;
    
    // Test bench debug signals
@@ -41,7 +44,8 @@ module tb_texel_assembler();
    
    // Test case expected output values for the test case
    reg 	      tb_expected_ahb_user_read_buffer;
-   reg [167:0] tb_expected_texel_buffer;
+   Triangle3D         tb_expected_texel_vertices_out;
+   Color              tb_expected_texel_color_out;
    reg 	       tb_expected_texel_ready;
    reg [167:0] texel_word;
    
@@ -54,7 +58,8 @@ module tb_texel_assembler();
       .ahb_data_available(tb_ahb_data_available),
       .texel_read(tb_texel_read),
       .ahb_user_read_buffer(tb_ahb_user_read_buffer),
-      .texel_buffer(tb_texel_buffer),
+      .texel_vertices_out(tb_texel_vertices_out),
+      .texel_color_out(tb_texel_color_out),
       .texel_ready(tb_texel_ready)
       );
    
@@ -89,18 +94,26 @@ module tb_texel_assembler();
       end
    endtask // send_byte
    
-   task check_texel_buffer;
-      input       [167:0] expected_texel_buffer;
-
+   task check_texel;
+      input expected_texel_vertices_out;
+      input expected_texel_color_out;
+      			  
       begin
-	 assert(expected_texel_buffer == tb_texel_buffer)
-	   $info("Test case %0d: Correct texel_buffer Output", tb_test_case);
+	 assert(expected_texel_vertices_out == tb_texel_vertices_out)
+	   $info("Test case %0d: Correct texel_vertices Output", tb_test_case);
+	 else begin
+            $error("Test case %0d: Incorrect texel_vertices Output", tb_test_case);
+	    $error("Expected %0d, got %0d", expected_texel_vertices_out, tb_texel_vertices_out);
+	 end
+	 
+	 assert(expected_texel_color_out == tb_texel_color_out)
+	   $info("Test case %0d: Correct texel_color Output", tb_test_case);
          else begin
-           $error("Test case %0d: Incorrect texel_buffer Output", tb_test_case);
-           $error("Expected %0d, got %0d", expected_texel_buffer, tb_texel_buffer);
-         end
+	    $error("Test case %0d: Incorrect texel_color Output", tb_test_case);
+	    $error("Expected %0d, got %0d", expected_texel_color_out, tb_texel_color_out);
+	 end
       end
-   endtask // assert
+      endtask
 
    task check_flags;
       input 		expected_texel_ready;
@@ -156,6 +169,21 @@ module tb_texel_assembler();
 	   
 	   data_test_vector = {FRAME_START, 32'h33221100, 32'h77665544, 32'hBBAA9988, 32'hFFEEDDCC, 32'h76543210, 32'hFEDBCA98, FRAME_END};
 	   
+	   tb_expected_texel_vertices_out.p.x = data_test_vector[6][15:0];
+	   tb_expected_texel_vertices_out.p.y = data_test_vector[6][31:16];
+	   tb_expected_texel_vertices_out.p.z = data_test_vector[5][15:0];
+	   
+	   tb_expected_texel_vertices_out.q.x = data_test_vector[5][31:16];
+	   tb_expected_texel_vertices_out.q.y = data_test_vector[4][15:0];
+	   tb_expected_texel_vertices_out.q.z = data_test_vector[4][31:16];
+   
+	   tb_expected_texel_vertices_out.r.x = data_test_vector[3][15:0];
+	   tb_expected_texel_vertices_out.r.y = data_test_vector[3][31:16];
+	   tb_expected_texel_vertices_out.r.z = data_test_vector[2][15:0];
+   
+	   tb_expected_texel_color_out.r = data_test_vector[2][23:16];
+	   tb_expected_texel_color_out.g = data_test_vector[2][31:24];
+	   tb_expected_texel_color_out.b = data_test_vector[1][7:0];
 	   
 	   for(i=0; i<8; i=i+1) begin
 	      tb_test_case += 1;
@@ -167,11 +195,11 @@ module tb_texel_assembler();
 	      @(negedge tb_clk);
 	   end
 
-	   tb_expected_texel_buffer = {data_test_vector[1][7:0],data_test_vector[2],data_test_vector[3],data_test_vector[4],data_test_vector[5],data_test_vector[6]};
-	   check_texel_buffer(tb_expected_texel_buffer);
+	  
+	   
+	   check_texel(tb_expected_texel_vertices_out, tb_expected_texel_color_out);
 	   tb_expected_texel_ready = 1'b1;
 	   tb_expected_ahb_user_read_buffer = 1'b0;
-	   check_flags(1'b1, 1'b0);
 	   check_flags(tb_expected_texel_ready,tb_expected_ahb_user_read_buffer);
 
 	   @(negedge tb_clk);

@@ -36,6 +36,10 @@ end
 
 always_comb begin
 	next_state = state;
+	p.x = 0;
+	p.y = 0;
+	q.x = 0;
+	q.y = 0;
 	case(state)
 		IDLE: begin
 			if(start) begin
@@ -55,6 +59,8 @@ always_comb begin
 			q = triangle.q;
 		end
 		DRAW1: begin
+			p = triangle.p;
+			q = triangle.q;
 			if(bresen_done) begin
 				next_state = SETUP2;
 			end
@@ -68,6 +74,8 @@ always_comb begin
 			q = triangle.r;
 		end
 		DRAW2: begin
+			p = triangle.q;
+			q = triangle.r;
 			if(bresen_done) begin
 				next_state = SETUP3;
 			end
@@ -81,6 +89,8 @@ always_comb begin
 			q = triangle.p;
 		end
 		DRAW3: begin
+			p = triangle.r;
+			q = triangle.p;
 			if(bresen_done) begin
 				next_state = DONE;
 			end

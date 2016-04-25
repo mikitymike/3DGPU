@@ -22,27 +22,41 @@ module bresen
 typedef enum logic [3:0] { IDLE, SETUP, PLOT, STEP, CHECK, DONE } State;
 
 State state, next_state;
-shortint pdx, pdy, dx, dy, err, e2, x, y;
+shortint pdx, pdy, dx, dy, e2;
+shortint err, x, y, next_err, next_x, next_y;
 wire down, right;
 
 assign pdx = q.x - p.x;
 assign pdy = q.y - p.y;
+
 assign right = ~(pdx[15]);
-assign dx = !right ? -pdx : pdx;
 assign down = ~(pdy[15]);
-assign dy = down ? -pdy : pdy;
+
+assign dx = !right ? -pdx : pdx;
+assign dy =  down  ? -pdy : pdy;
+
+assign e2 = err << 1;
 
 always_ff @ (posedge clk, negedge n_rst) begin
 	if(n_rst == 0) begin
 		state <= IDLE;
+		err <= 0;
+		x <= 0;
+		y <= 0;
 	end
 	else begin
 		state <= next_state;
+		err <= next_err;
+		x <= next_x;
+		y <= next_y;
 	end
 end
 
 always_comb begin
 	next_state = state;
+	next_err = err;
+	next_x = x;
+	next_y = y;
 	case(state)
 		IDLE: begin
 			if(start) begin
@@ -54,9 +68,9 @@ always_comb begin
 		end
 		SETUP: begin
 			next_state = PLOT;
-			err = dx + dy;
-			x = p.x;
-			y = p.y;
+			next_err = dx + dy;
+			next_x = p.x;
+			next_y = p.y;
 		end
 		PLOT: begin
 			next_state = CHECK;
@@ -71,23 +85,31 @@ always_comb begin
 		end
 		STEP: begin
 			next_state = PLOT;
-			e2 = err << 1;
+			if(e2 > dy && e2 < dx) begin
+				next_err = err + dy + dx;
+			end
+			else if(e2 > dy) begin
+				next_err = err + dy;
+			end
+			else if(e2 < dx) begin
+				next_err = err + dx;
+			end
+
 			if(e2 > dy) begin
-				err = err + dy;
 				if(right) begin
-					x = x + 1;
+					next_x = x + 1;
 				end
 				else begin
-					x = x - 1;
+					next_x = x - 1;
 				end
 			end
+
 			if(e2 < dx) begin
-				err = err + dx;
 				if(down) begin
-					y = y + 1;
+					next_y = y + 1;
 				end
 				else begin
-					y = y - 1;
+					next_y = y - 1;
 				end
 			end
 		end

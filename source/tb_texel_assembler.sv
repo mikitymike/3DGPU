@@ -99,21 +99,21 @@ module tb_texel_assembler();
       input expected_texel_color_out;
       			  
       begin
-	 assert(expected_texel_vertices_out == tb_texel_vertices_out)
+	 assert(tb_expected_texel_vertices_out == tb_texel_vertices_out)
 	   $info("Test case %0d: Correct texel_vertices Output", tb_test_case);
 	 else begin
             $error("Test case %0d: Incorrect texel_vertices Output", tb_test_case);
-	    $error("Expected %0d, got %0d", expected_texel_vertices_out, tb_texel_vertices_out);
+	    $error("Expected %0d, got %0d", tb_expected_texel_vertices_out, tb_texel_vertices_out);
 	 end
 	 
-	 assert(expected_texel_color_out == tb_texel_color_out)
+	 assert(tb_expected_texel_color_out == tb_texel_color_out)
 	   $info("Test case %0d: Correct texel_color Output", tb_test_case);
          else begin
 	    $error("Test case %0d: Incorrect texel_color Output", tb_test_case);
-	    $error("Expected %0d, got %0d", expected_texel_color_out, tb_texel_color_out);
+	    $error("Expected %0d, got %0d", tb_expected_texel_color_out, tb_texel_color_out);
 	 end
       end
-      endtask
+   endtask
 
    task check_flags;
       input 		expected_texel_ready;
@@ -194,8 +194,6 @@ module tb_texel_assembler();
 	      check_flags(tb_expected_texel_ready,tb_expected_ahb_user_read_buffer);
 	      @(negedge tb_clk);
 	   end
-
-	  
 	   
 	   check_texel(tb_expected_texel_vertices_out, tb_expected_texel_color_out);
 	   tb_expected_texel_ready = 1'b1;

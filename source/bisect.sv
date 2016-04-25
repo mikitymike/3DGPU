@@ -15,39 +15,30 @@ module bisect
    input wire 	      tri_select,
    );
 
-   reg [31:0] 	      buffer [5:0];
-   reg 		      ahb_shift_enable;
    
+   reg [1:0] 	      max_dist;
+   reg [15:0] 	      dist_1;
+   reg [15:0] 	      dist_2;
+   reg [15:0] 	      dist_3;
    
-   assign texel_vertices_out.p.x = buffer[0][15:0];
-   assign texel_vertices_out.p.y = buffer[0][31:16];
-   assign texel_vertices_out.p.z = buffer[1][15:0];
-   
-   assign texel_vertices_out.q.x = buffer[1][31:16];
-   assign texel_vertices_out.q.y = buffer[2][15:0];
-   assign texel_vertices_out.q.z = buffer[2][31:16];
-   
-   assign texel_vertices_out.r.x = buffer[3][15:0];
-   assign texel_vertices_out.r.y = buffer[3][31:16];
-   assign texel_vertices_out.r.z = buffer[4][15:0];
-   
-   assign texel_color_out.r = buffer[4][23:16];
-   assign texel_color_out.g = buffer[4][31:24];
-   assign texel_color_out.b = buffer[5][7:0];
-   
-   
+    
    always_comb begin
+
+      // Find distance between each of the 3 points (in 2D ignoring z)
       dist_1 = sqrt((tri_in.p.x-tri_in.q.x)*(tri_in.p.x-tri_in.q.x) + (tri_in.p.y-tri_in.q.y)*(tri_in.p.y-tri_in.q.y));
       dist_2 = sqrt((tri_in.q.x-tri_in.r.x)*(tri_in.q.x-tri_in.r.x) + (tri_in.q.y-tri_in.r.y)*(tri_in.q.y-tri_in.r.y));
       dist_3 = sqrt((tri_in.r.x-tri_in.p.x)*(tri_in.r.x-tri_in.p.x) + (tri_in.r.y-tri_in.p.y)*(tri_in.r.y-tri_in.p.y));
-      max_dist = (dist_1 > dist_2) ? ((dist_1 > dist_3) ? dist_1 : dist_3) : ((dist_2 > dist_3) ? dist_2 : dist_3);
 
-      if(max_dist == dist_1) begin
+      // Determine which distance is the longest distance
+      max_dist = (dist_1 > dist_2) ? ((dist_1 > dist_3) ? 2'd1 : 2'd3) : ((dist_2 > dist_3) ? 2'd2 : 2'd3);
+
+      // Bisect the longest side
+      if(max_dist == 2'd1) begin
 	 tri_mid.p = tri_in.p;
 	 tri_mid.p = tri_in.q;
 	 tri_mid.p = tri_in.r;
       end
-      else if(max_dist == dist_2) begin
+      else if(max_dist == 2'd2) begin
 	 tri_mid.p = tri_in.q;
 	 tri_mid.p = tri_in.r;
 	 tri_mid.p = tri_in.p;
@@ -58,6 +49,14 @@ module bisect
 	 tri_mid.p = tri_in.q;
       end
 
+      //      Longest side
+      // P1-------Q1P2----Q2
+      //   \       |     /
+      //     \     |   /
+      //       \   | /
+      //         R1R2
+      
+      // T1
       tri_out_1.p = tri_mid.p;
 
       tri_out_1.q.x = (tri_mid.p.x - tri_mid.q.x) >> 1;

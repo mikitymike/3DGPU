@@ -4,7 +4,7 @@
 
 
 `include "defines_package.vh"
-//import defines_package::*;
+
 
 module bresen
 (
@@ -17,7 +17,6 @@ module bresen
 	output wire plot,
 	output wire done
 );
-
 
 typedef enum logic [3:0] { IDLE, SETUP, PLOT, STEP, CHECK, DONE } State;
 

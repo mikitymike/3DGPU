@@ -7,16 +7,21 @@ module 3dgpu
 (
 	input wire clk,
 	input wire n_rst,
-
+	input wire [31:0] data_in,
+	input wire data_ready,
+	output wire data_read,
+	output wire [31:0] data_out,
+	output wire data_ready_out,
+	input wire write_buffer_full
 );
 
 
-clipandsplit CAS
+clipandsplit CLIPANDSPLIT
 	(
 
 	);
 
-rasterizer RAS
+rasterizer RASTERIZER
 	(
 		.clk(clk),
 		.n_rst(n_rst),

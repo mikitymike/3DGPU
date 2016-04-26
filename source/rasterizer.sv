@@ -1,12 +1,9 @@
 /*
 	Triangle Rasterizer Structure.
-
-	wireframe_sram can't be in this structure since
-	colorfill needs to know about it.
 */
 
+
 `include "defines_package.vh"
-//import defines_package::*;
 
 
 module rasterizer
@@ -29,12 +26,16 @@ Triangle2D transform;
 Point2D p;
 Point2D q;
 Point2D plot_point;
+Point2D clear_point;
 wire plot;
 wire bresen_done;
 wire bresen_start;
+wire clear;
 
 assign o_triangle = i_triangle;
 assign o_color = i_color;
+
+
 
 
 ortho_proj ORTHO_PROJ
@@ -54,6 +55,8 @@ rasterizer_controller CONTROLLER
 		.p(p),
 		.q(q),
 		.bresen_start(bresen_start),
+		.clear_point(clear_point),
+		.clear(clear),
 		.done(done)
 	);
 
@@ -63,14 +66,25 @@ bresen BRESEN
 		.clk(clk),
 		.n_rst(n_rst),
 		.start(bresen_start),
-		.p(p),
-		.q(q),
+		.p(p), // start_point
+		.q(q), // end_point
 		.point(plot_point),
 		.plot(plot),
 		.done(bresen_done)
 	);
 
 
+wireframe_plot WF_PLOT
+	(
+		.plot(plot),
+		.clear(clear),
+		.clear_point(clear_point),
+		.plot_point(plot_point),
+		.write_en(write_en),
+		.wf_data(wf_data),
+		.addr(addr)
+	);
+/*
 plot PLOT
 	(
 		.plot(plot),
@@ -79,6 +93,6 @@ plot PLOT
 		.wf_data(wf_data),
 		.addr(addr)
 	);
-
+*/
 
 endmodule

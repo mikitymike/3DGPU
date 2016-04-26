@@ -77,16 +77,16 @@ module tb_rasterizer
 			image_data[i] = 0;
 		end
 
-		tb_i_triangle.p.x = 3;
-		tb_i_triangle.p.y = 3;
-		tb_i_triangle.p.z = 3;
+		tb_i_triangle.p.x = 0;
+		tb_i_triangle.p.y = 0;
+		tb_i_triangle.p.z = 0;
 		
-		tb_i_triangle.q.x = 300;
-		tb_i_triangle.q.y = 300;
+		tb_i_triangle.q.x = `WIDTH-1;
+		tb_i_triangle.q.y = `HEIGHT-1;
 		tb_i_triangle.q.z = 10;
 
-		tb_i_triangle.r.x = 50;
-		tb_i_triangle.r.y = 150;
+		tb_i_triangle.r.x = 0;
+		tb_i_triangle.r.y = `HEIGHT-1;
 		tb_i_triangle.r.z = 20;
 
 		tb_i_color.r = 0;
@@ -107,7 +107,7 @@ module tb_rasterizer
 		@(posedge tb_clk);
 		tb_start = 1;
 
-		#1000000;
+		@(posedge tb_done);
 		
 		$display("Writing to file.\n");	
 		for(i = 0; i < `HEIGHT; i++) begin

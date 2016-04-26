@@ -129,6 +129,8 @@ triangle_area AREA3
 		.area(a3)
 	);
 
+
+// TODO: Change divide to altera IP
 assign z = (triangle.p.z * a1 + triangle.q.z * a2, triangle.r.z * a3) / a;
 
 endmodule

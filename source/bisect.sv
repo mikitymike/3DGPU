@@ -126,10 +126,12 @@ module bisect
       //R1
       tri_out_2.r = tri_mid.r;
 
-      // Multiplex the split triangles
-      assign tri_out = tri_select == 1'b0 ? tri_out_1 : tri_out_2;      
+      
    end // always_comb begin
 
+   
+   // Multiplex the split triangles
+   assign tri_out = tri_select == 1'b0 ? tri_out_1 : tri_out_2;      
 
    		  
 endmodule // bisect

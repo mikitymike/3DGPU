@@ -22,13 +22,15 @@ module tb_bisect();
    logic tb_clk;
    logic tb_n_rst;
    logic tb_tri_select;
-   integer dist1;
-   integer dist2;
-   integer dist3;
+   longint dist1;
+   longint dist2;
+   longint dist3;
    logic [1:0] maxdist;
    Triangle3D tb_tri_in;
    Triangle3D tb_tri_buff;
    longint i;
+   longint err_count;
+   
    	
    // DUT outputs
    Triangle3D tb_tri_out;
@@ -84,54 +86,63 @@ module tb_bisect();
          else begin
             $error("Test case %0d: Incorrect p.x Output", tb_test_case);
 	    $error("Expected %0d, got %0d", e_tri.p.x, tb_tri_out.p.x);
+	    err_count++;
 	 end // UNMATCHED !!
 	 assert((16'h7FFF&(e_tri.p.y-tb_tri_out.p.y)) < 2)
 	   $info("Test case %0d: Correct p.y", tb_test_case);
          else begin
             $error("Test case %0d: Incorrect p.y Output", tb_test_case);
 	    $error("Expected %0d, got %0d", e_tri.p.y, tb_tri_out.p.y);
+	    err_count++;
 	 end // UNMATCHED !!
 	 assert((16'h7FFF&(e_tri.p.z-tb_tri_out.p.z)) < 2)
 	   $info("Test case %0d: Correct p.x", tb_test_case);
          else begin
             $error("Test case %0d: Incorrect p.x Output", tb_test_case);
 	    $error("Expected %0d, got %0d", e_tri.p.z, tb_tri_out.p.z);
+	    err_count++;
 	 end // UNMATCHED !!
 	 assert((16'h7FFF&(e_tri.q.x-tb_tri_out.q.x)) < 2)
 	   $info("Test case %0d: Correct q.x", tb_test_case);
          else begin
             $error("Test case %0d: Incorrect q.x Output", tb_test_case);
 	    $error("Expected %0d, got %0d", e_tri.q.x, tb_tri_out.q.x);
+	    err_count++;
 	 end // UNMATCHED !!
 	 assert((16'h7FFF&(e_tri.q.y-tb_tri_out.q.y)) < 2)
 	   $info("Test case %0d: Correct q.y", tb_test_case);
          else begin
             $error("Test case %0d: Incorrect q.y Output", tb_test_case);
 	    $error("Expected %0d, got %0d", e_tri.q.y, tb_tri_out.q.y);
+	    err_count++;
 	 end // UNMATCHED !!
 	 assert((16'h7FFF&(e_tri.q.z-tb_tri_out.q.z)) < 2)
 	   $info("Test case %0d: Correct q.z", tb_test_case);
          else begin
             $error("Test case %0d: Incorrect q.z Output", tb_test_case);
 	    $error("Expected %0d, got %0d", e_tri.q.z, tb_tri_out.q.z);
+	    err_count++;
 	 end // UNMATCHED !!
 	 assert((16'h7FFF&(e_tri.r.x-tb_tri_out.r.x)) < 2)
 	   $info("Test case %0d: Correct r.x", tb_test_case);
          else begin
             $error("Test case %0d: Incorrect r.x Output", tb_test_case);
 	    $error("Expected %0d, got %0d", e_tri.r.x, tb_tri_out.r.x);
+	    err_count++;
 	 end // UNMATCHED !!
 	 assert((16'h7FFF&(e_tri.r.y-tb_tri_out.r.y)) < 2)
 	   $info("Test case %0d: Correct r.y", tb_test_case);
          else begin
             $error("Test case %0d: Incorrect r.y Output", tb_test_case);
 	    $error("Expected %0d, got %0d", e_tri.r.y, tb_tri_out.r.y);
+	    err_count++;
 	 end // UNMATCHED !!
 	 assert((16'h7FFF&(e_tri.r.z-tb_tri_out.r.z)) < 2)
 	   $info("Test case %0d: Correct r.z", tb_test_case);
          else begin
             $error("Test case %0d: Incorrect r.z Output", tb_test_case);
 	    $error("Expected %0d, got %0d", e_tri.r.z, tb_tri_out.r.z);
+	    err_count++;
 	 end
       end
    endtask
@@ -146,20 +157,21 @@ module tb_bisect();
 
 	// Actual test bench process
 	initial
-	begin : TEST_PROC
-	   
+	  begin : TEST_PROC
+	     err_count = 0;
+	     	   
 	   // Initilize all inputs to inactive/idle values
 	   tb_n_rst = 1'b1; // Initially inactive
 
-	   tb_tri_buff.p.x = 16'd115;
-	   tb_tri_buff.p.y = 16'd56;
-	   tb_tri_buff.p.z = 16'd0;
-	   tb_tri_buff.q.x = 16'd346;
-	   tb_tri_buff.q.y = 16'd850;
-	   tb_tri_buff.q.z = 16'd0;
-	   tb_tri_buff.r.x = 16'd310;
-	   tb_tri_buff.r.y = 16'd450;
-	   tb_tri_buff.r.z = 16'd0;
+	   tb_tri_buff.p.x = 0;
+	   tb_tri_buff.p.y = 0;
+	   tb_tri_buff.p.z = 0;
+	   tb_tri_buff.q.x = 0;
+	   tb_tri_buff.q.y = 0;
+	   tb_tri_buff.q.z = 0;
+	   tb_tri_buff.r.x = 0;
+	   tb_tri_buff.r.y = 0;
+	   tb_tri_buff.r.z = 0;
 	   
 	   tb_tri_select = 1'b0;
 	   	   
@@ -172,86 +184,108 @@ module tb_bisect();
 
 	   // DUT Reset
 	   reset_dut;
-	  	  
-	   //Main Tests
-	   @(negedge tb_clk);
 
-	   dist1 = ((((tb_tri_buff.p.x-tb_tri_buff.q.x)**2) + ((tb_tri_buff.p.y-tb_tri_buff.q.y)**2)));
-	   dist2 = ((((tb_tri_buff.q.x-tb_tri_buff.r.x)**2) + ((tb_tri_buff.q.y-tb_tri_buff.r.y)**2)));
-	   dist3 = ((((tb_tri_buff.r.x-tb_tri_buff.p.x)**2) + ((tb_tri_buff.r.y-tb_tri_buff.p.y)**2)));
+	   for(i=0; i<1001; i++) begin
+	      tb_test_case += 1;
+	      tb_tri_select = 1'b0;
 
-	   if((dist1 > dist2) && (dist1 > dist3)) begin
-	      maxdist = 2'd1;
-	   end
-	   else begin
-	      if((dist2 > dist1) && (dist2 > dist3)) begin
-		 maxdist = 2'd2;
+	      if(i == 1000) begin
+		 tb_tri_buff.p.x = -(2**14 - 1);
+		 tb_tri_buff.p.y = -(2**14 - 1);
+		 tb_tri_buff.p.z = -(2**14 - 1);
+		 tb_tri_buff.q.x = (2**14 - 1);
+		 tb_tri_buff.q.y = (2**14 - 1);
+		 tb_tri_buff.q.z = (2**14 - 1);
+		 tb_tri_buff.r.x = -(2**14 - 1);
+		 tb_tri_buff.r.y = (2**14 - 1);
+		 tb_tri_buff.r.z = -(2**14 - 1);
 	      end
 	      else begin
-		 maxdist = 2'd3;
-	      end
-	   end
-
-	   // PQ is longest
-	   if(maxdist == 2'd1) begin
-	      tb_tri_in.p = tb_tri_buff.p;
-	      tb_tri_in.q = tb_tri_buff.q;
-	      tb_tri_in.r = tb_tri_buff.r;
-	   end
-	   //QR is longest
-	   else if(maxdist == 2'd2) begin
-	      tb_tri_in.p = tb_tri_buff.q;
-	      tb_tri_in.q = tb_tri_buff.r;
-	      tb_tri_in.r = tb_tri_buff.p;
-	   end
-	   //RP is longest
-	   else begin
-	      tb_tri_in.p = tb_tri_buff.r;
-	      tb_tri_in.q = tb_tri_buff.p;
-	      tb_tri_in.r = tb_tri_buff.q;
-	   end
-	   
-	   tb_expected_tri_out.p = tb_tri_in.p;
-
-	   if(tb_tri_in.p.x > tb_tri_in.q.x)
-	     tb_expected_tri_out.q.x = tb_tri_in.q.x + (tb_tri_in.p.x - tb_tri_in.q.x)/2.0;
-	   else
-	     tb_expected_tri_out.q.x = tb_tri_in.p.x + (tb_tri_in.q.x - tb_tri_in.p.x)/2.0;
-
-	   if(tb_tri_in.p.y > tb_tri_in.q.y)	   
-	     tb_expected_tri_out.q.y = tb_tri_in.q.y + (tb_tri_in.p.y - tb_tri_in.q.y)/2.0;
-	   else
-	     tb_expected_tri_out.q.y = tb_tri_in.p.y + (tb_tri_in.q.y - tb_tri_in.p.y)/2.0;
-
-	   if(tb_tri_in.p.z > tb_tri_in.q.z)	   
-	     tb_expected_tri_out.q.z = tb_tri_in.q.z + (tb_tri_in.p.z - tb_tri_in.q.z)/2.0;
-	   else
-	     tb_expected_tri_out.q.z = tb_tri_in.p.z + (tb_tri_in.q.z - tb_tri_in.p.z)/2.0;
-	   
-	   tb_expected_tri_out.r = tb_tri_in.r;
-	   
-/*	   for(i=0; i<8; i=i+1) begin
-	      tb_test_case += 1;
-	      tb_ahb_buffer = data_test_vector[8-i];
-	      tb_ahb_data_available = 1'b1;
-	      tb_expected_texel_ready = 1'b0;
-	      tb_expected_ahb_user_read_buffer = 1'b1;
-	      check_flags(tb_expected_texel_ready,tb_expected_ahb_user_read_buffer);
+		 tb_tri_buff.p.x = -(10 + 2*i);
+		 tb_tri_buff.p.y = -(3 + 30*i);
+		 tb_tri_buff.p.z = -(23 + 5*i);
+		 tb_tri_buff.q.x = 16 + 7*i;
+		 tb_tri_buff.q.y = 32 + 32*i;
+		 tb_tri_buff.q.z = 9 * i;
+		 tb_tri_buff.r.x = -(3 + 32*i);
+		 tb_tri_buff.r.y = 6 * (i+456)/i;
+		 tb_tri_buff.r.z = -((8 * i) + (1000/i));
+	      end // else: !if(i == 1000)
+	      
+	      //Main Tests
 	      @(negedge tb_clk);
-	   end*/
+	      
+	      dist1 = ((((tb_tri_buff.p.x-tb_tri_buff.q.x)**2) + ((tb_tri_buff.p.y-tb_tri_buff.q.y)**2)));
+	      dist2 = ((((tb_tri_buff.q.x-tb_tri_buff.r.x)**2) + ((tb_tri_buff.q.y-tb_tri_buff.r.y)**2)));
+	      dist3 = ((((tb_tri_buff.r.x-tb_tri_buff.p.x)**2) + ((tb_tri_buff.r.y-tb_tri_buff.p.y)**2)));
 
-	   @(negedge tb_clk);
-	   
-	   check_triangle(tb_expected_tri_out);
 
-	   tb_expected_tri_out.p = tb_expected_tri_out.q;
-	   tb_expected_tri_out.q = tb_tri_in.q;
-	   tb_tri_select = 1'b1;
-	   
-	   
-	   @(negedge tb_clk);
+	      maxdist = (dist1 > dist2) ? ((dist1 > dist3) ? 2'd1 : 2'd3) : ((dist2 > dist3) ? 2'd2 : 2'd3);
 
-	   check_triangle(tb_expected_tri_out);
-	end // block: TEST_PROC
-   
+/*	      if((dist1 > dist2) && (dist1 > dist3)) begin
+		 maxdist = 2'd1;
+	      end
+	      else begin
+		 if((dist2 > dist1) && (dist2 > dist3)) begin
+		    maxdist = 2'd2;
+		 end
+		 else begin
+		    maxdist = 2'd3;
+		 end
+	      end*/
+	      
+	      // PQ is longest
+	      if(maxdist == 2'd1) begin
+		 tb_tri_in.p = tb_tri_buff.p;
+		 tb_tri_in.q = tb_tri_buff.q;
+		 tb_tri_in.r = tb_tri_buff.r;
+	      end
+	      //QR is longest
+	      else if(maxdist == 2'd2) begin
+		 tb_tri_in.p = tb_tri_buff.q;
+		 tb_tri_in.q = tb_tri_buff.r;
+		 tb_tri_in.r = tb_tri_buff.p;
+	      end
+	      //RP is longest
+	      else begin
+		 tb_tri_in.p = tb_tri_buff.r;
+		 tb_tri_in.q = tb_tri_buff.p;
+		 tb_tri_in.r = tb_tri_buff.q;
+	      end
+	      
+	      tb_expected_tri_out.p = tb_tri_in.p;
+	      
+	      if(tb_tri_in.p.x > tb_tri_in.q.x)
+		tb_expected_tri_out.q.x = tb_tri_in.q.x + ((tb_tri_in.p.x - tb_tri_in.q.x)/2);
+	      else
+		tb_expected_tri_out.q.x = tb_tri_in.p.x + ((tb_tri_in.q.x - tb_tri_in.p.x)/2);
+	      
+	      if(tb_tri_in.p.y > tb_tri_in.q.y)	   
+		tb_expected_tri_out.q.y = tb_tri_in.q.y + ((tb_tri_in.p.y - tb_tri_in.q.y)/2);
+	      else
+		tb_expected_tri_out.q.y = tb_tri_in.p.y + ((tb_tri_in.q.y - tb_tri_in.p.y)/2);
+	      
+	      if(tb_tri_in.p.z > tb_tri_in.q.z)	   
+		tb_expected_tri_out.q.z = tb_tri_in.q.z + ((tb_tri_in.p.z - tb_tri_in.q.z)/2);
+	      else
+		tb_expected_tri_out.q.z = tb_tri_in.p.z + ((tb_tri_in.q.z - tb_tri_in.p.z)/2);
+	      
+	      tb_expected_tri_out.r = tb_tri_in.r;
+	      
+	      @(negedge tb_clk);
+	      
+	      check_triangle(tb_expected_tri_out);
+	      
+	      tb_expected_tri_out.p = tb_expected_tri_out.q;
+	      tb_expected_tri_out.q = tb_tri_in.q;
+	      tb_tri_select = 1'b1;
+	      
+	      
+	      @(negedge tb_clk);
+	      
+	      check_triangle(tb_expected_tri_out);
+	   end // for (i=0; i<100; i++)
+
+	     $info("Error Count: %0d", err_count);
+	end // block: TEST_", tb_test_case);
 endmodule

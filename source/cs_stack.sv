@@ -15,30 +15,42 @@ module cs_stack
    input      Triangle3D tri_in, 
    output     Triangle3D tri_out,
    input wire push,
-   input wire pop
+   input wire pop,
+   output logic empty,
+   output logic full
    );
 
-   parameter DEPTH = 8;
+   parameter DEPTH = 3;
       
-   logic [DEPTH-1:0] ptr;
-   Triangle3D stack [DEPTH-1:0];
+   logic [DEPTH:0] ptr;
+   Triangle3D stack [2**DEPTH];
    
    always @(posedge clk, negedge n_rst) begin
-      if (n_rst == 1'b0)
-	ptr <= 0;
-      else if (push)
+      if (n_rst == 1'b0) begin
+	 ptr <= 0;
+	 
+      end
+      else if (!full && push)
 	ptr <= ptr + 1;
-      else if (pop)
+      else if (!empty && pop)
 	ptr <= ptr - 1;
    end
    
-   always @(posedge clk) begin
-      if (push) begin
-	 stack[ptr] <= tri_in;
+   always @(posedge clk, negedge n_rst) begin
+      if(n_rst == 1'b0) begin
+	 tri_out <= '0;
       end
-      else if (pop) begin
-	 tri_out <= stack[ptr-1];
-      end
+      else begin
+	 if (!full && push) begin
+	    stack[ptr] <= tri_in;
+	 end
+	 else if (!empty && pop) begin
+	    tri_out <= stack[(ptr-1)];
+	 end
+      end // else: !if(n_rst == 1'b0)
    end
+
+   assign empty = (ptr == '0);
+   assign full = ((ptr >> DEPTH) == 1);
    
 endmodule

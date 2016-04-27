@@ -27,7 +27,8 @@ module tb_cs_stack();
       	
    // DUT outputs
    Triangle3D tb_tri_out;
-      
+   logic tb_empty;
+   logic tb_full;   
    // Test bench debug signals
    // Overall test case number for reference
    integer tb_test_case;
@@ -46,7 +47,9 @@ module tb_cs_stack();
       .tri_in(tb_tri_in),
       .tri_out(tb_tri_out),
       .push(tb_push),
-      .pop(tb_pop)
+      .pop(tb_pop),
+      .empty(tb_empty),
+      .full(tb_full)
       );
    
    task reset_dut;
@@ -132,8 +135,7 @@ module tb_cs_stack();
 	     
 	     check_triangle(tb_expected_tri_out);
 
-
-		tb_push = 1;
+	     tb_push = 1;
 
 	     for(i=0; i < 8; i++) begin		
 		tb_tri_in = data_test_vector[i];

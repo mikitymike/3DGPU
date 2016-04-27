@@ -6,32 +6,6 @@
 `include "defines_package.vh"
 
 
-module min3_shortint
-(
-	input shortint a,
-	input shortint b,
-	input shortint c,
-	output shortint min
-);
-
-assign min = a < b ? (a < c ? a : c) : (b < c ? b : c);
-
-endmodule
-
-
-module max3_shortint
-(
-	input shortint a,
-	input shortint b,
-	input shortint c,
-	output shortint max
-);
-
-assign max = a > b ? (a > c ? a : c) : (b > c ? b : c);
-
-endmodule
-
-
 module triangle_area
 (
 	input Point2D p,
@@ -40,43 +14,14 @@ module triangle_area
 	output shortint area
 );
 
-shortint minx, maxx, miny, maxy; 
+// shoelace formula
 
+shortint sarea2, area2;
 
-min3_shortint MINX
-	(
-		.a(p.x),
-		.b(q.x),
-		.c(r.x),
-		.min(minx)
-	);
+assign sarea2 = p.x*q.y + q.x*r.y + r.x*p.y - q.x*p.y - r.x*q.y - p.x*r.y;
+assign area2 = sarea2 < 0 ? -sarea2 : sarea2;
 
-min3_shortint MINY
-	(
-		.a(p.y),
-		.b(q.y),
-		.c(r.y),
-		.min(miny)
-	);
-
-max3_shortint MAXX
-	(
-		.a(p.x),
-		.b(q.x),
-		.c(r.x),
-		.min(maxx)
-	);
-
-max3_shortint MAXY
-	(
-		.a(p.y),
-		.b(q.y),
-		.c(r.y),
-		.min(maxy)
-	);
-
-
-assign area = ((maxx - minx) * (maxy - miny)) >> 1;
+assign area = area2 >> 1;
 
 endmodule
 
@@ -85,8 +30,7 @@ module z_interpolation
 (
 	input Triangle3D triangle,
 	input Point2D point,
-	output shortint z; 
-
+	output shortint z 
 );
 
 shortint a, a1, a2, a3;
@@ -130,7 +74,14 @@ triangle_area AREA3
 	);
 
 
-// TODO: Change divide to altera IP
-assign z = (triangle.p.z * a1 + triangle.q.z * a2, triangle.r.z * a3) / a;
+shortint num;
+num = (triangle.p.z * a1 + triangle.q.z * a2, triangle.r.z * a3);
+
+lpmdivide DIV
+	(
+		.denom(a),
+		.numer(num),
+		.quotient(z)	
+	);
 
 endmodule

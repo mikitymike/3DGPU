@@ -7,7 +7,6 @@
 
 
 `include "defines_package.vh"
-// import defines_package::*;
 
 
 module tb_rasterizer
@@ -31,12 +30,10 @@ module tb_rasterizer
 	reg tb_done;
 
 
-	integer image_data [`WIDTH*`HEIGHT];
+	integer image_data [`WIDTH * `HEIGHT];
 	integer i, j;
 
 	
-	
-
 	always begin
 		tb_clk = 0;
 		#(CLK_PERIOD/2.0);
@@ -71,10 +68,10 @@ module tb_rasterizer
 		$fwrite(fp, "P1\n");
 		$fwrite(fp, "# 2D wireframe\n");
 		$fwrite(fp, "%d %d\n", `WIDTH, `HEIGHT);
-		
+	
 		$display("Initializing image data.\n");
-		for(i = 0; i < `WIDTH*`HEIGHT; i++) begin
-			image_data[i] = 0;
+		for(i = 0; i < `WIDTH * `HEIGHT; i++) begin
+			image_data[i] = 1;
 		end
 
 		tb_i_triangle.p.x = 0;

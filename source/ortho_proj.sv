@@ -3,7 +3,6 @@
 */
 
 
-//import defines_package::*;
 `include "defines_package.vh"
 
 

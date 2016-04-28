@@ -13,12 +13,12 @@ module triangle_area
 	input Point2D p,
 	input Point2D q,
 	input Point2D r,
-	output shortint area
+	output integer area
 );
 
 // shoelace formula
 
-shortint sarea2, area2;
+integer sarea2, area2;
 
 assign sarea2 = p.x*q.y + q.x*r.y + r.x*p.y - q.x*p.y - r.x*q.y - p.x*r.y;
 assign area2 = sarea2 < 0 ? -sarea2 : sarea2;
@@ -35,7 +35,7 @@ module z_interpolation
 	output reg [7:0] z 
 );
 
-shortint a, a1, a2, a3;
+integer a, a1, a2, a3;
 Point2D p, q, r;
 
 assign p = {triangle.p.x, triangle.p.y};

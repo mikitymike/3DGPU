@@ -233,7 +233,7 @@ module tb_colorloop
 
 		tb_i_triangle.r.x = 50;
 		tb_i_triangle.r.y = 300;
-		tb_i_triangle.r.z = 30;
+		tb_i_triangle.r.z = 150;
 
 		tb_rgb_val.r = 25;
 		tb_rgb_val.g = 255;

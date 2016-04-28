@@ -10,7 +10,17 @@
 `timescale 1ns / 10ps
 `include "defines_package.vh"
 
-module tb_reorient_tri();
+`define INSIDE 'b0000
+`define LEFT 'b0001
+`define RIGHT 'b0010
+`define BOTTOM 'b0100
+`define TOP 'b1000
+`define XMIN 0
+`define XMAX 640
+`define YMAX 480
+`define YMIN 0
+
+module tb_outcode();
       
    // Define parameters
    parameter CLK_PERIOD				= 2.5;
@@ -21,36 +31,28 @@ module tb_reorient_tri();
    //  DUT inputs
    logic tb_clk;
    logic tb_n_rst;
-   Triangle3D tb_tri_in;
-   Triangle3D tb_tri_buff;
+   Point2D tb_p;
    longint i;
    longint err_count;
    
-   longint dist1;
-   longint dist2;
-   longint dist3;
-   logic [1:0] maxdist;
-	
    // DUT outputs
-   Triangle3D tb_tri_out;
+   logic [3:0] tb_code;
       
    // Test bench debug signals
    // Overall test case number for reference
    integer tb_test_case;
    
    // Test case 'inputs' used for test stimulus
-   Triangle3D data_test_vector [7:0];
+   Point2D data_test_vector [18];
    
    // Test case expected output values for the test case
-   Triangle3D         tb_expected_tri_out;
+   logic [3:0]         tb_expected_code;
    
    // DUT portmap
-   reorient_tri DUT
+   outcode DUT
      (
-      .clk(tb_clk),
-      .n_rst(tb_n_rst),
-      .tri_in(tb_tri_in),
-      .tri_out(tb_tri_out)
+      .p(tb_p),
+      .code(tb_code)
       );
    
    task reset_dut;
@@ -75,187 +77,78 @@ module tb_reorient_tri();
       end
    endtask // reset_dut
    
-   task check_triangle;
-      input Triangle3D e_tri;
+   task check_code;
+      input logic [3:0] expected_code;
 
       begin
-	 assert((16'h7FFF&(e_tri.p.x-tb_tri_out.p.x)) < 2)
-	   $info("Test case %0d: Correct p.x", tb_test_case);
+	 assert(expected_code == tb_code)
+	   $info("Test case %0d: Correct outcode", tb_test_case);
          else begin
-            $error("Test case %0d: Incorrect p.x Output", tb_test_case);
-	    $error("Expected %0d, got %0d", e_tri.p.x, tb_tri_out.p.x);
+            $error("Test case %0d: Incorrect outcode", tb_test_case);
+	    $error("Expected %0d, got %0d", expected_code, tb_code);
 	    err_count++;
 	 end // UNMATCHED !!
-	 assert((16'h7FFF&(e_tri.p.y-tb_tri_out.p.y)) < 2)
-	   $info("Test case %0d: Correct p.y", tb_test_case);
-         else begin
-            $error("Test case %0d: Incorrect p.y Output", tb_test_case);
-	    $error("Expected %0d, got %0d", e_tri.p.y, tb_tri_out.p.y);
-	    err_count++;
-	 end // UNMATCHED !!
-	 assert((16'h7FFF&(e_tri.p.z-tb_tri_out.p.z)) < 2)
-	   $info("Test case %0d: Correct p.x", tb_test_case);
-         else begin
-            $error("Test case %0d: Incorrect p.x Output", tb_test_case);
-	    $error("Expected %0d, got %0d", e_tri.p.z, tb_tri_out.p.z);
-	    err_count++;
-	 end // UNMATCHED !!
-	 assert((16'h7FFF&(e_tri.q.x-tb_tri_out.q.x)) < 2)
-	   $info("Test case %0d: Correct q.x", tb_test_case);
-         else begin
-            $error("Test case %0d: Incorrect q.x Output", tb_test_case);
-	    $error("Expected %0d, got %0d", e_tri.q.x, tb_tri_out.q.x);
-	    err_count++;
-	 end // UNMATCHED !!
-	 assert((16'h7FFF&(e_tri.q.y-tb_tri_out.q.y)) < 2)
-	   $info("Test case %0d: Correct q.y", tb_test_case);
-         else begin
-            $error("Test case %0d: Incorrect q.y Output", tb_test_case);
-	    $error("Expected %0d, got %0d", e_tri.q.y, tb_tri_out.q.y);
-	    err_count++;
-	 end // UNMATCHED !!
-	 assert((16'h7FFF&(e_tri.q.z-tb_tri_out.q.z)) < 2)
-	   $info("Test case %0d: Correct q.z", tb_test_case);
-         else begin
-            $error("Test case %0d: Incorrect q.z Output", tb_test_case);
-	    $error("Expected %0d, got %0d", e_tri.q.z, tb_tri_out.q.z);
-	    err_count++;
-	 end // UNMATCHED !!
-	 assert((16'h7FFF&(e_tri.r.x-tb_tri_out.r.x)) < 2)
-	   $info("Test case %0d: Correct r.x", tb_test_case);
-         else begin
-            $error("Test case %0d: Incorrect r.x Output", tb_test_case);
-	    $error("Expected %0d, got %0d", e_tri.r.x, tb_tri_out.r.x);
-	    err_count++;
-	 end // UNMATCHED !!
-	 assert((16'h7FFF&(e_tri.r.y-tb_tri_out.r.y)) < 2)
-	   $info("Test case %0d: Correct r.y", tb_test_case);
-         else begin
-            $error("Test case %0d: Incorrect r.y Output", tb_test_case);
-	    $error("Expected %0d, got %0d", e_tri.r.y, tb_tri_out.r.y);
-	    err_count++;
-	 end // UNMATCHED !!
-	 assert((16'h7FFF&(e_tri.r.z-tb_tri_out.r.z)) < 2)
-	   $info("Test case %0d: Correct r.z", tb_test_case);
-         else begin
-            $error("Test case %0d: Incorrect r.z Output", tb_test_case);
-	    $error("Expected %0d, got %0d", e_tri.r.z, tb_tri_out.r.z);
-	    err_count++;
-	 end
       end
    endtask
 
    always
-	begin : CLK_GEN
-		tb_clk = 1'b0;
-		#(CLK_PERIOD / 2);
-		tb_clk = 1'b1;
-		#(CLK_PERIOD / 2);
-	end
-
-	// Actual test bench process
-	initial
-	  begin : TEST_PROC
-	     err_count = 0;
-	     	   
-	   // Initilize all inputs to inactive/idle values
-	   tb_n_rst = 1'b1; // Initially inactive
-
-	   tb_tri_buff.p.x = 0;
-	   tb_tri_buff.p.y = 0;
-	   tb_tri_buff.p.z = 0;
-	   tb_tri_buff.q.x = 0;
-	   tb_tri_buff.q.y = 0;
-	   tb_tri_buff.q.z = 0;
-	   tb_tri_buff.r.x = 0;
-	   tb_tri_buff.r.y = 0;
-	   tb_tri_buff.r.z = 0;
-	   
-	   	   
-	   // Test case 0: Basic Power on Reset
-	   tb_test_case = 0;
-	   
-	   // Define expected ouputs for this test case
-	   // Note: expected outputs should all be inactive/idle values
-	   // For a good packet RX Data value should match data sent
-
-	   // DUT Reset
-	   reset_dut;
-
-	   for(i=0; i<1001; i++) begin
+     begin : CLK_GEN
+	tb_clk = 1'b0;
+	#(CLK_PERIOD / 2);
+	tb_clk = 1'b1;
+	#(CLK_PERIOD / 2);
+     end
+   
+   // Actual test bench process
+   initial
+     begin : TEST_PROC
+	err_count = 0;
+	
+	// Initilize all inputs to inactive/idle values
+	tb_n_rst = 1'b1; // Initially inactive
+	
+	tb_p = '0;
+	
+	// Test case 0: Basic Power on Reset
+	tb_test_case = 0;
+	
+	// Define expected ouputs for this test case
+	// Note: expected outputs should all be inactive/idle values
+	// For a good packet RX Data value should match data sent
+	
+	// DUT Reset
+	reset_dut;
+	
+	data_test_vector = {-100,560,300,560,750,560,-100,300,300,300,750,300,-100,-100,300,-100,750,-100};
+	
+	@(negedge tb_clk);	   
+	   for(i=0; i<9; i++) begin
 	      tb_test_case += 1;
 	
-	      if(i == 1000) begin
-		 tb_tri_buff.p.x = -(2**14 - 1);
-		 tb_tri_buff.p.y = -(2**14 - 1);
-		 tb_tri_buff.p.z = -(2**14 - 1);
-		 tb_tri_buff.q.x = (2**14 - 1);
-		 tb_tri_buff.q.y = (2**14 - 1);
-		 tb_tri_buff.q.z = (2**14 - 1);
-		 tb_tri_buff.r.x = -(2**14 - 1);
-		 tb_tri_buff.r.y = (2**14 - 1);
-		 tb_tri_buff.r.z = -(2**14 - 1);
-	      end
-	      else begin
-		 tb_tri_buff.p.x = -(10 + 2*i);
-		 tb_tri_buff.p.y = -(3 + 30*i);
-		 tb_tri_buff.p.z = -(23 + 5*i);
-		 tb_tri_buff.q.x = 16 + 7*i;
-		 tb_tri_buff.q.y = 32 + 32*i;
-		 tb_tri_buff.q.z = 9 * i;
-		 tb_tri_buff.r.x = -(3 + 32*i);
-		 tb_tri_buff.r.y = 6 * (i+456)/i;
-		 tb_tri_buff.r.z = -((8 * i) + (1000/i));
-	      end // else: !if(i == 1000)
+	      tb_p.x = data_test_vector[2*i];
+	      tb_p.y = data_test_vector[2*i+1];
 	      
+	    	      
 	      //Main Tests
-	      @(negedge tb_clk);
-	      
-	      dist1 = ((((tb_tri_buff.p.x-tb_tri_buff.q.x)**2) + ((tb_tri_buff.p.y-tb_tri_buff.q.y)**2)));
-	      dist2 = ((((tb_tri_buff.q.x-tb_tri_buff.r.x)**2) + ((tb_tri_buff.q.y-tb_tri_buff.r.y)**2)));
-	      dist3 = ((((tb_tri_buff.r.x-tb_tri_buff.p.x)**2) + ((tb_tri_buff.r.y-tb_tri_buff.p.y)**2)));
 
-
-	      maxdist = (dist1 > dist2) ? ((dist1 > dist3) ? 2'd1 : 2'd3) : ((dist2 > dist3) ? 2'd2 : 2'd3);
-
-/*	      if((dist1 > dist2) && (dist1 > dist3)) begin
-		 maxdist = 2'd1;
-	      end
-	      else begin
-		 if((dist2 > dist1) && (dist2 > dist3)) begin
-		    maxdist = 2'd2;
-		 end
-		 else begin
-		    maxdist = 2'd3;
-		 end
-	      end*/
 	      
-	      // PQ is longest
-	      if(maxdist == 2'd1) begin
-		 tb_tri_in.p = tb_tri_buff.p;
-		 tb_tri_in.q = tb_tri_buff.q;
-		 tb_tri_in.r = tb_tri_buff.r;
-	      end
-	      //QR is longest
-	      else if(maxdist == 2'd2) begin
-		 tb_tri_in.p = tb_tri_buff.q;
-		 tb_tri_in.q = tb_tri_buff.r;
-		 tb_tri_in.r = tb_tri_buff.p;
-	      end
-	      //RP is longest
-	      else begin
-		 tb_tri_in.p = tb_tri_buff.r;
-		 tb_tri_in.q = tb_tri_buff.p;
-		 tb_tri_in.r = tb_tri_buff.q;
-	      end
+	      tb_expected_code = `INSIDE;          // initialised as being inside of clip window
+      
+	      if (tb_p.x < `XMIN)           // to the left of clip window
+		tb_expected_code |= `LEFT;
+	      else if (tb_p.x > `XMAX)      // to the right of clip window
+		tb_expected_code |= `RIGHT;
 	      
+	      if (tb_p.y < `YMIN)           // below the clip window
+		tb_expected_code |= `BOTTOM;
+	      else if (tb_p.y > `YMAX)      // above the clip window
+		tb_expected_code |= `TOP;
 	      
-	      tb_expected_tri_out.r = tb_tri_in.r;
+	      @(negedge tb_clk);	   
+	      check_code(tb_expected_code);
 	      
-	      
-
 	   end // for (i=0; i<100; i++)
-
-	     $info("Error Count: %0d", err_count);
-	end // block: TEST_", tb_test_case);
+	
+	$info("Error Count: %0d", err_count);
+     end // block: TEST_", tb_test_case);
 endmodule

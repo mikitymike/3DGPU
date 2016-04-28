@@ -8,15 +8,15 @@
 
 `include "defines_package.vh"
 
-`define INSIDE 4'b0000
-`define LEFT 4'b0001
-`define RIGHT 4'b0010
-`define BOTTOM 4'b0100
-`define TOP 4'b1000
-`define XMIN 16'd0
-`define XMAX 16'd640
-`define YMAX 16'd480
-`define YMIN 16'd0
+`define INSIDE 'b0000
+`define LEFT 'b0001
+`define RIGHT 'b0010
+`define BOTTOM 'b0100
+`define TOP 'b1000
+`define XMIN 0
+`define XMAX 640
+`define YMAX 480
+`define YMIN 0
 
 module outcode
   (

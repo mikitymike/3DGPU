@@ -15,7 +15,6 @@ module triangle_area
 );
 
 // shoelace formula
-
 shortint sarea2, area2;
 
 assign sarea2 = p.x*q.y + q.x*r.y + r.x*p.y - q.x*p.y - r.x*q.y - p.x*r.y;

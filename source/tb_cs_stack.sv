@@ -129,7 +129,7 @@ module tb_cs_stack();
 	     
 	     tb_test_case += 1;
 	     
-	     tb_expected_tri_out = 'x;
+	     tb_expected_tri_out = '0;
 	     
 	     @(negedge tb_clk);
 	     

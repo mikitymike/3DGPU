@@ -149,10 +149,10 @@ module tb_texel_assembler();
 	begin : TEST_PROC
 	   
 	   // Initilize all inputs to inactive/idle values
-	   tb_n_rst = 1'b1; // Initially inactive
-	   tb_ahb_buffer = 1'b0;
-	   tb_ahb_data_available = 1'b0;
-	   tb_texel_read = 1'b0;
+	   tb_n_rst = '1; // Initially inactive
+	   tb_ahb_buffer = '0;
+	   tb_ahb_data_available = '0;
+	   tb_texel_read = '0;
 	   	   
 	   // Test case 0: Basic Power on Reset
 	   tb_test_case = 0;
@@ -187,10 +187,14 @@ module tb_texel_assembler();
 	   
 	   for(i=0; i<8; i=i+1) begin
 	      tb_test_case += 1;
-	      tb_ahb_buffer = data_test_vector[8-i];
+	      tb_ahb_buffer = data_test_vector[7-i];
 	      tb_ahb_data_available = 1'b1;
 	      tb_expected_texel_ready = 1'b0;
 	      tb_expected_ahb_user_read_buffer = 1'b1;
+	      if(i==7) begin
+		 tb_expected_texel_ready = 1'b1;
+		 tb_expected_ahb_user_read_buffer = 1'b0;
+	      end
 	      check_flags(tb_expected_texel_ready,tb_expected_ahb_user_read_buffer);
 	      @(negedge tb_clk);
 	   end

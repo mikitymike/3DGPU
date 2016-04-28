@@ -3,12 +3,14 @@
 */
 
 
-import defines_package::*;
+//import defines_package::*;
+`include "defines_package.vh"
+
 
 module ortho_proj
 (
-	input Triangle3D tri3;
-	output Triangle2D tri2;
+	input Triangle3D tri3,
+	output Triangle2D tri2
 );
 
 

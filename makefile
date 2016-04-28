@@ -16,12 +16,12 @@ include /home/ecegrid/a/ece337/Course_Prod/course_make_vars
 # (do not include the source folder in the name)
 # NOTE: YOU WILL NEED TO SET THIS VARIABLE'S VALUE WHEN WORKING WITH HEIRARCHICAL DESIGNS
 # AND THE AUTOMATED GRADING SYSTEM
-COMPONENT_FILES	:= 
+COMPONENT_FILES	:= colorfill.sv z_interpolation.sv 
 
 # Specify the name of the top level file (do not include the source folder in the name)
 # NOTE: YOU WILL NEED TO SET THIS VARIABLE'S VALUE WHEN WORKING WITH HEIRARCHICAL DESIGNS
 # AND THE AUTOMATED GRADING SYSTEM
-TOP_LEVEL_FILE	:= 
+TOP_LEVEL_FILE	:= colorloop.sv
 
 # Specify the filepath of the test bench you want to use (ie. tb_top_level.sv)
 # (do not include the source folder in the name)
@@ -41,9 +41,12 @@ GATE_LIB		:= $(AMI_05_LIB)
 S_WORK_LIB := source_work
 M_WORK_LIB := mapped_work
 
+FPGA_MF_LIB := "/home/ecegrid/a/ece337/Course_Prod/FPGA_Libs/altera_mf_ver"
+#DIVIDE_LIB := "/package/eda/altera/altera14.0/ip/altera/megafunctions"
+
 LIB_CREATE	:= vlib
 COMPILE 		:= vlog -sv
-SIMULATE		:= vsim -Lf $(LABS_IP_LIB) -L $(GATE_LIB) -L $(GOLD_LIB) +no_glitch_msg -coverage -voptargs="+acc"
+SIMULATE		:= vsim -Lf $(LABS_IP_LIB) -Lf $(FPGA_MF_LIB) -L $(GATE_LIB) -L $(GOLD_LIB) +no_glitch_msg -coverage -voptargs="+acc"
 DC_SHELL		:= dc_shell-t
 
 ##############################################################################

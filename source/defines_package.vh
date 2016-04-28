@@ -12,6 +12,7 @@
 `define WIREFRAME_ADDR_SIZE 	 19
 `define FRAME_BUFFER_ADDR_SIZE 	 19
 `define COLOR_BITS 		 24
+`define LAYER_SIZE                8
 // CHUNK_SIZE must evenly divide HEIGHT
 `define CHUNK_SIZE		  4
 `define NUM_CF_MODS		(HEIGHT / CHUNK_SIZE)

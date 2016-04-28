@@ -4,6 +4,8 @@
 
 
 `include "defines_package.vh"
+`include "lpmdivide.v"
+//`include "alt_sqrt.v"
 
 
 module triangle_area
@@ -21,7 +23,7 @@ shortint sarea2, area2;
 assign sarea2 = p.x*q.y + q.x*r.y + r.x*p.y - q.x*p.y - r.x*q.y - p.x*r.y;
 assign area2 = sarea2 < 0 ? -sarea2 : sarea2;
 
-assign area = area2 >> 1;
+assign area = area2 / 2;
 
 endmodule
 
@@ -30,7 +32,7 @@ module z_interpolation
 (
 	input Triangle3D triangle,
 	input Point2D point,
-	output shortint z 
+	output reg [7:0] z 
 );
 
 shortint a, a1, a2, a3;
@@ -73,15 +75,22 @@ triangle_area AREA3
 		.area(a3)
 	);
 
+integer num;
+assign num = (triangle.p.z * a1 + triangle.q.z * a2 + triangle.r.z * a3) / a;
+//assign num = triangle.p.z * a1 / a + triangle.q.z * a2 / a + triangle.r.z * a3 / a;
 
-shortint num;
-num = (triangle.p.z * a1 + triangle.q.z * a2, triangle.r.z * a3);
+//lpmdivide DIV
+//	(
+//		.denom(a),
+//		.numer(num),
+//		.quotient(zb)	
+//	);
 
-lpmdivide DIV
-	(
-		.denom(a),
-		.numer(num),
-		.quotient(z)	
-	);
+//alt_sqrt	alt_sqrt_inst (
+//	.radical ( {a,num} ),
+//	.q ( zb )
+//	);
+
+assign z = num[7:0];
 
 endmodule

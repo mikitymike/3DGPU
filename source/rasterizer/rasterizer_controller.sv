@@ -3,7 +3,8 @@
 */
 
 
-import defines_package::*;
+`include "defines_package.vh"
+//import defines_package::*;
 
 
 module rasterizer_controller
@@ -11,8 +12,8 @@ module rasterizer_controller
 	input wire clk,
 	input wire n_rst,
 	input wire start,
-	input Triange2D triangle;
-	input wire bresen_done;
+	input Triangle2D triangle,
+	input wire bresen_done,
 	
 	output Point2D p,
 	output Point2D q,
@@ -35,14 +36,22 @@ end
 
 always_comb begin
 	next_state = state;
+	p.x = 0;
+	p.y = 0;
+	q.x = 0;
+	q.y = 0;
 	case(state)
 		IDLE: begin
 			if(start) begin
 				next_state = CLEAR;
 			end
+			else begin
+				next_state = IDLE;
+			end
 		end
 		CLEAR: begin
-			
+			// TODO: make clear
+			next_state = SETUP1;				
 		end
 		SETUP1: begin
 			next_state = DRAW1;
@@ -50,8 +59,13 @@ always_comb begin
 			q = triangle.q;
 		end
 		DRAW1: begin
+			p = triangle.p;
+			q = triangle.q;
 			if(bresen_done) begin
 				next_state = SETUP2;
+			end
+			else begin
+				next_state = DRAW1;
 			end
 		end
 		SETUP2: begin
@@ -60,18 +74,28 @@ always_comb begin
 			q = triangle.r;
 		end
 		DRAW2: begin
+			p = triangle.q;
+			q = triangle.r;
 			if(bresen_done) begin
 				next_state = SETUP3;
 			end
+			else begin
+				next_state = DRAW2;	
+			end			
 		end
 		SETUP3: begin
 			next_state = DRAW3;
 			p = triangle.r;
-			q = triangle.p
+			q = triangle.p;
 		end
 		DRAW3: begin
+			p = triangle.r;
+			q = triangle.p;
 			if(bresen_done) begin
 				next_state = DONE;
+			end
+			else begin
+				next_state = DRAW3;
 			end
 		end
 		DONE: begin

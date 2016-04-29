@@ -8,37 +8,46 @@
 
 
 `include "defines_package.vh"
+`include "clip_defines.vh"
 
 module co_su
-  (
-   input 	     Point2D pin0,
-   input 	     Point2D pin1,
-   input logic [3:0] outcode0,
-   input logic [3:0] outcode1,
-   output 	     Point2D pout0,
-   output 	     Point2D pout1,
-   output logic      accept,
-   output logic      reject
-   );
+  #(
+    parameter clip_side = `TOP
+    )
+   (
+    input 	 Line2D line_in,
+    output 	 Line2D line_out,
+    output logic accept
+    );
 
-   Point2D p0;
-   Point2D p1;
    Point2D intp;
+   
    logic [3:0] 	     outcodeOut;
+   logic [3:0] 	     outcode0;
+   logic [3:0] 	     outcode1;
+
+   outcode code0
+     (
+      .p(line_in.s),
+      .code(outcode0)
+      );
+   
+   outcode code1
+     (
+      .p(line_in.p),
+      .code(outcode1)
+      )
    
    always_comb begin
-      accept = 0;
-      reject = 0;
 
-      pout1 = pin1;
-      pout2 = pin2;
+      accept = 1;
+      line_out = line_in;
       
       if (!(outcode0 | outcode1)) begin // Bitwise OR is 0. Trivially accept and get out of loop
-	 accept = 1;
 	 break;
       end
       else if (outcode0 & outcode1) begin // Bitwise AND is not 0. Trivially reject and get out of loop
-	 reject = 1;
+	 accept = 0;
 	 break;
       end else begin
 	 
@@ -47,32 +56,32 @@ module co_su
 	 
 	 // Now find the intersection point;
 	 // use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
-	 if (outcodeOut & `TOP) begin           // point is above the clip rectangle
-	    intp.x = p0.x + (p1.x - p0.x) * (`YMAX - p0.y) / (p0.y - p0.y);
-	    intpy = `YMAX;
-	 end else if (outcodeOut & `BOTTOM) begin // point is below the clip rectangle
-	    intp.x = p0.x + (p1.x - p0.x) * (`YMIN - p0.y) / (p1.y - p0.y);
-	    intp.y = ymin;
-	 end else if (outcodeOut & `RIGHT) begin  // point is to the right of clip rectangle
-	    intp.y = p0.y + (p1.y - p0.y) * (`XMAX - p0.x) / (p1.x - p0.x);
+	 if (outcodeOut & `TOP & clip_side) begin           // point is above the clip rectangle
+	    intp.x = line_in.s.x + (line_in.p.x - line_in.s.x) * (`YMAX - line_in.s.y) / (line_in.p.y - line_in.s.y);
+	    intp.y = `YMAX;
+	 end else if ((outcodeOut & `BOTTOM & clip_side) && begin // point is below the clip rectangle
+	    intp.x = line_in.s.x + (line_in.p.x - line_in.s.x) * (`YMIN - line_in.s.y) / (line_in.p.y - line_in.s.y);
+	    intp.y = `YMIN;
+	 end else if ((outcodeOut & `RIGHT & clip_side) && begin  // point is to the right of clip rectangle
+	    intp.y = line_in.s.y + (line_in.p.y - line_in.s.y) * (`XMAX - line_in.s.x) / (line_in.p.x - line_in.s.x);
 	    intp.x = `XMAX;
-	 end else if (outcodeOut & `LEFT) begin   // point is to the left of clip rectangle
-	    intp.y = p0.y + (p1.y - p0.y) * (`XMIN - p0.x) / (p1.x - p0.x);
+	 end else if ((outcodeOut & `LEFT * clip_side) && begin   // point is to the left of clip rectangle
+	    intp.y = line_in.s.y + (line_in.p.y - line_in.s.y) * (`XMIN - line_in.s.x) / (line_in.p.x - line_in.s.x);
 	    intp.x = `XMIN;
 	 end
 	 
 	 // Now we move outside point to intersection point to clip
 	 // and get ready for next pass.
 	 if (outcodeOut == outcode0) begin
-	    pout0 = intp;
-	    pout0 = intp;
+	    lineout.s = intp;
 	 end else begin
-	    pout1 = intp;
-	    pout1 = intp;
+	    lineout.p = intp;
 	 end
+	 accept = 1;
       end
    end // always_comb   
    
    
 endmodule // co_su
+
 

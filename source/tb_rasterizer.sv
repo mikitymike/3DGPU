@@ -13,7 +13,7 @@ module tb_rasterizer
 ();
 	localparam CLK_PERIOD = 20;
 	localparam DELAY = 6;
-	localparam NUM_TESTS = 10;
+	localparam NUM_TESTS = 1;
 
 	integer fp;
 

@@ -31,6 +31,16 @@ typedef struct packed {
 } Point2D;
 
 typedef struct packed {
+   Point2D s;
+   Point2D p;
+} Line2D;
+
+typedef struct {
+   Point2D side [8];
+   logic [2:0] size;
+} Polygon2D;
+
+typedef struct packed {
 	Point3D p, q, r;
 } Triangle3D;
 

@@ -2,10 +2,10 @@
 
 module colorloop
 (
-	input wire [(`LAYER_SIZE-1):0] zbuf_val,
-	input wire sram_val,
 	input wire clk,
 	input wire n_rst,
+	input wire [(`LAYER_SIZE-1):0] zbuf_val,
+	input wire sram_val,
 	input shortint height,
 	input Color rgb_val,
 	input Triangle3D ver,
@@ -17,7 +17,6 @@ module colorloop
 	output reg write_en,
 	output reg [(`LAYER_SIZE-1):0] data_out,
 	output Color data_out_color
-	
 );
 
 
@@ -42,21 +41,18 @@ end
 always_comb begin
 	next = curr;
 	next_height_count = height_count;
-	
 	case(curr)
 		IDLE: begin
 			if(color_en) begin
 				next = LOOP;
 				next_height_count = height;
-				
-				
 			end
 			else begin
 				next = IDLE;
 			end
 		end
 		LOOP: begin
-			if(next_height_count == 480) begin //CHANGE BACK TO CHUNK SIZE ??????
+			if(next_height_count == `CHUNK_SIZE) begin //CHANGE BACK TO CHUNK SIZE ??????
 				next = DONE;
 			end
 			else begin
@@ -68,12 +64,11 @@ always_comb begin
 			if(data_ready) begin
 				next = LOOP;
 				//height_count = height_count + 1;
-				next_height_count = height_count +1;
+				next_height_count = height_count + 1;
 			end
 			else begin
 				next = WAIT;
 			end	
-
 		end
 		DONE: begin
 			next = IDLE;

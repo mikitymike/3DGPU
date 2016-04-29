@@ -101,7 +101,7 @@ generate
 				.n_rst(n_rst),
 				.zbuf_val(zb_data_outs[i]),
 				.sram_val(wf_data_outs[i]),
-				.height(i*`CHUNKSIZE),
+				.height(i*`CHUNK_SIZE),
 				.rgb_val(),
 				.ver(ver),
 				.color_en(), // start signal

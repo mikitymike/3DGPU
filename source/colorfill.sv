@@ -15,145 +15,123 @@ module colorfill
 	input wire color_en,
 	output reg data_ready,
 	output reg [(`WIREFRAME_ADDR_SIZE-1):0] sram_addr,
-	output reg [(`SRAM_ADDR_SIZE-1):0] zbuf_addr,
-	output reg [(`FRAME_BUFFER_ADDR_SIZE-1):0] fb_addr,
+	output wire [(`SRAM_ADDR_SIZE-1):0] zbuf_addr,
+	output wire [(`FRAME_BUFFER_ADDR_SIZE-1):0] fb_addr,
 	output reg write_en,
-	output reg [7:0] data_out,
+	output wire [7:0] data_out,
 	output Color data_out_color
 );
 
-typedef enum logic [3:0] {IDLE, WAITL, FIND1L, WAITR, FIND1R, FILL, WAITZ, CHECKZ, WRITE, STEP, DONE } state_type;
+typedef enum logic [4:0] {IDLE, WAITL, FIND1L, WAITR, FIND1R, FILL, WAITZ, CHECKZ, WRITE, STEP, DONE } state_type;
 state_type curr, next;
 
-reg [15:0] left;
-reg [15:0] right;
-reg [18:0] srambaseaddr;
-reg [18:0] sramnextaddr;
 Point2D point;
-logic [7:0] zbuf;
-reg [15:0] next_right, next_left;
-	
+logic signed [15:0] left, right, next_left, next_right;
+logic [(`WIREFRAME_ADDR_SIZE-1):0] base_addr;
+logic [(`WIREFRAME_ADDR_SIZE-1):0] next_sram_addr;
+logic [(`LAYER_SIZE-1):0] zbuf;
+
 
 always_ff @(posedge clk, negedge n_rst) begin
 	if(!n_rst) begin
-		curr <= IDLE;
-		left <= 0;
-		right <= 0;
+		curr      <= IDLE;
+		left      <= 0;
+		right     <= 0;
 		sram_addr <= 0;
 	end
 	else begin
-		curr <= next;
-		sram_addr <= sramnextaddr;
-		left <= next_left;
-		right <= next_right;
+		curr      <= next;
+		sram_addr <= next_sram_addr;
+		left      <= next_left;
+		right     <= next_right;
 	end
-	
 end
 
-assign point.y = height; 
-assign point.x = left;
-assign srambaseaddr = height * 640; 
+
+assign point = {left, height};
+assign base_addr = height * 640; 
 assign data_out_color = rgb_val;
 assign data_out = zbuf;
-assign zbuf_addr = height * 640 + left;
-assign fb_addr = height * 640 + left;
+assign zbuf_addr = base_addr + left;
+assign fb_addr = base_addr + left;
+
 
 always_comb begin
 	next = curr;
 	next_left = left;
 	next_right = right;
-	sramnextaddr = sram_addr;//maybe
+	next_sram_addr = sram_addr;
 	write_en = 0;
 	case(curr)
-		IDLE:	begin
-					if(color_en) begin
-						next = WAITL;
-						next_left = 0;
-						next_right = `WIDTH-1;
-						sramnextaddr = left + srambaseaddr;
-						//count = 0;
-					end
-					else begin
-						next = IDLE;
-					end
-				end
-		WAITL:	begin
-				next = FIND1L;
-
+		IDLE: begin
+			if(color_en) begin
+				next = WAITL;
+				next_left = 0;
+				next_right = `WIDTH-1;
+				next_sram_addr = left + base_addr;
 			end
+			else begin
+				next = IDLE;
+			end
+		end
+		WAITL: begin
+			next = FIND1L;
+		end
 		FIND1L: begin
-					
-					if(sram_val || left == (`WIDTH-1)) begin
-						next = WAITR;
-						sramnextaddr = right + srambaseaddr;
-						
-					end
-					else begin
-						//next = FIND1L;
-						next_left = left + 1;
-						sramnextaddr = left + srambaseaddr;
-					end
-					
-				end
-
+			if(sram_val || left == (`WIDTH-1)) begin
+				next = WAITR;
+				next_sram_addr = right + base_addr;
+			end
+			else begin
+				next = FIND1L;
+				next_left = left + 1;
+				next_sram_addr = left + base_addr;
+			end
+		end
 		WAITR: begin
-				next = FIND1R;
-		      end
-
+			next = FIND1R;
+		end
 		FIND1R: begin
-					if(sram_val || right == 0) begin 
-						next = FILL;
-					end
-					else begin
-						next = FIND1R;
-						next_right = right - 1;
-						sramnextaddr = right + srambaseaddr;
-					end
-				end
-
-		FILL:begin
-					write_en = 0;
-					if(left > right) begin
-						next = DONE;
-					end
-					else begin
-						next = WAITZ;
-					end
-					
-					
+			if(sram_val || right == 0) begin 
+				next = FILL;
 			end
+			else begin
+				next = FIND1R;
+				next_right = right - 1;
+				next_sram_addr = right + base_addr;
+			end
+		end
+		FILL: begin
+			if(left > right) begin
+				next = DONE;
+			end
+			else begin
+				next = WAITZ;
+			end
+		end
 		WAITZ: begin
-				next = CHECKZ;
-			end
-
+			next = CHECKZ;
+		end
 		CHECKZ: begin
-				//$display("zbuf = %d zbuf_val(ram) = %d\n",zbuf, zbuf_val);
-				if(zbuf > zbuf_val) begin 
-					next = WRITE;						
-					//write_en = 1;
-					//$display("zbuf = %d zbuf_val(ram) = %d\n",zbuf, zbuf_val);
-					//data_out = zbuf;
-				end
-				else begin
-					next = STEP;
-				end
-				//next_left = left + 1;
-				//next = FILL;
-				
+			if(zbuf > zbuf_val) begin 
+				next = WRITE;						
 			end
+			else begin
+				next = STEP;
+			end
+		end
 		WRITE: begin
 			write_en = 1;
 			next = STEP;
-			//$display("zbuf = %d zbuf_val(ram) = %d\n",zbuf, zbuf_val);
 		end
 		STEP: begin
 			next = FILL;
 			next_left = left + 1;
 		end
-		DONE:	begin
-				next = IDLE; //how long do i need to asser done
-				next_left = 0;
-			end
+		DONE: begin
+			next = IDLE;
+			next_left = 0;
+		end
 	endcase				
 end
 

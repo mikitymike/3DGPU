@@ -31,7 +31,7 @@ state_type curr, next;
 always_ff @(posedge clk, negedge n_rst)  begin
 	if(!n_rst) begin
 		curr <= IDLE;
-		height_count <= height;
+		height_count <= 0;
 	end
 	else begin
 		curr <= next;
@@ -47,7 +47,7 @@ always_comb begin
 		IDLE: begin
 			if(color_en) begin
 				next = LOOP;
-				//height_count = height;
+				next_height_count = height;
 				
 				
 			end

@@ -4,7 +4,7 @@
 
 
 `include "defines_package.vh"
-`include "lpmdivide.v"
+//`include "lpmdivide.v"
 //`include "alt_sqrt.v"
 
 
@@ -75,7 +75,7 @@ triangle_area AREA3
 		.area(a3)
 	);
 
-integer num;
+longint num;
 assign num = (triangle.p.z * a1 + triangle.q.z * a2 + triangle.r.z * a3) / a;
 //assign num = triangle.p.z * a1 / a + triangle.q.z * a2 / a + triangle.r.z * a3 / a;
 

@@ -22,17 +22,16 @@ module colorfill
 	output Color data_out_color
 );
 
-typedef enum logic [3:0] {IDLE, FIND1L, FIND1R, FILL, WAITZ, WAITZ2, WAITZ3, WAITZ4, CHECKZ, WRITE, STEP, DONE, WAIT, WAITL} state_type;
+typedef enum logic [3:0] {IDLE, WAITL, FIND1L, WAITR, FIND1R, FILL, WAITZ, CHECKZ, WRITE, STEP, DONE } state_type;
 state_type curr, next;
 
-shortint left;
-shortint right;
+reg [15:0] left;
+reg [15:0] right;
 reg [18:0] srambaseaddr;
 reg [18:0] sramnextaddr;
 Point2D point;
 logic [7:0] zbuf;
-shortint next_right, next_left;
-shortint count;
+reg [15:0] next_right, next_left;
 	
 
 always_ff @(posedge clk, negedge n_rst) begin
@@ -72,7 +71,7 @@ always_comb begin
 						next_left = 0;
 						next_right = `WIDTH-1;
 						sramnextaddr = left + srambaseaddr;
-						count = 0;
+						//count = 0;
 					end
 					else begin
 						next = IDLE;
@@ -85,19 +84,19 @@ always_comb begin
 		FIND1L: begin
 					
 					if(sram_val || left == (`WIDTH-1)) begin
-						next = WAIT;
+						next = WAITR;
 						sramnextaddr = right + srambaseaddr;
 						
 					end
 					else begin
-						next = FIND1L;
+						//next = FIND1L;
 						next_left = left + 1;
 						sramnextaddr = left + srambaseaddr;
 					end
 					
 				end
 
-		WAIT: begin
+		WAITR: begin
 				next = FIND1R;
 		      end
 
@@ -124,16 +123,6 @@ always_comb begin
 					
 			end
 		WAITZ: begin
-				next = WAITZ2;
-			end
-		WAITZ2: begin
-				next = WAITZ3;
-
-			end
-		WAITZ3: begin
-				next = WAITZ4;
-			end
-		WAITZ4: begin
 				next = CHECKZ;
 			end
 

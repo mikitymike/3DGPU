@@ -41,12 +41,12 @@ GATE_LIB		:= $(AMI_05_LIB)
 S_WORK_LIB := source_work
 M_WORK_LIB := mapped_work
 
-FPGA_MF_LIB := "/home/ecegrid/a/ece337/Course_Prod/FPGA_Libs/altera_mf_ver"
+#FPGA_MF_LIB := "/home/ecegrid/a/ece337/Course_Prod/FPGA_Libs/altera_mf_ver"
 #DIVIDE_LIB := "/package/eda/altera/altera14.0/ip/altera/megafunctions"
 
 LIB_CREATE	:= vlib
 COMPILE 		:= vlog -sv
-SIMULATE		:= vsim -Lf $(LABS_IP_LIB) -Lf $(FPGA_MF_LIB) -L $(GATE_LIB) -L $(GOLD_LIB) +no_glitch_msg -coverage -voptargs="+acc"
+SIMULATE		:= vsim -Lf $(LABS_IP_LIB) -L $(GATE_LIB) -L $(GOLD_LIB) +no_glitch_msg -coverage -voptargs="+acc"
 DC_SHELL		:= dc_shell-t
 
 ##############################################################################

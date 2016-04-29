@@ -38,7 +38,7 @@ module tb_colorloop
 	Triangle3D tb_i_triangle;
 	reg [(`LAYER_SIZE-1):0] tb_zbuf_val;
 	reg tb_sram_val;
-	shortint tb_height;
+	reg [15:0] tb_height;
 	Color tb_rgb_val;
 	//OUTPUTS
 	reg tb_done;
@@ -177,18 +177,26 @@ module tb_colorloop
 		tb_height = 0;
 
 
-		tb_n_rst = 1;
-		#DELAY;
+
 		tb_n_rst = 0;
 		#DELAY;
+		#DELAY;
+		#DELAY;
+		#DELAY;
+		@(negedge tb_clk);
+		@(negedge tb_clk);
+		@(negedge tb_clk);
+		@(negedge tb_clk);
+		@(negedge tb_clk);
+		#DELAY;
+		#DELAY;
+		#DELAY;
+		#DELAY;
+		#DELAY;
+		#DELAY;
 		tb_n_rst = 1;
-		#DELAY;
-		#DELAY;
-		#DELAY;
-		#DELAY;
-		#DELAY;
 		$display("Starting process.\n");	
-		@(posedge tb_clk);
+		@(negedge tb_clk);
 		tb_start = 1;
 
 		//@(posedge tb_done);
@@ -243,19 +251,27 @@ module tb_colorloop
 		tb_start = 0;
 		tb_height = 0;
 
-		tb_n_rst = 1;
-		#DELAY;
 		tb_n_rst = 0;
 		#DELAY;
+		#DELAY;
+		#DELAY;
+		#DELAY;
+		@(negedge tb_clk);
+		@(negedge tb_clk);
+		@(negedge tb_clk);
+		@(negedge tb_clk);
+		@(negedge tb_clk);
+		#DELAY;
+		#DELAY;
+		#DELAY;
+		#DELAY;
+		#DELAY;
+		#DELAY;
 		tb_n_rst = 1;
-		#DELAY;
-		#DELAY;
-		#DELAY;
-		#DELAY;
-		#DELAY;
+
 		$display("Starting process2.\n");
 
-		@(posedge tb_clk);
+		@(negedge tb_clk);
 		tb_start = 1;
 
 

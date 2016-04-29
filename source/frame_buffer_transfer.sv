@@ -13,7 +13,7 @@ module frame_buffer_transfer
 	output reg done,
 	input wire ready_for_data,
 	output reg [(`FRAME_BUFFER_ADDR_SIZE-1):0] addr,
-	input Color color,
+	input Color color
 );
 
 typedef enum logic [2:0] { IDLE, WRITE, CHECK, DONE } State;

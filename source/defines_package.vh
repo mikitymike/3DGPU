@@ -31,12 +31,12 @@ typedef struct packed {
 
 typedef struct packed {
    Point2D s;
-   Point2D e;
+   Point2D p;
 } Line2D;
 
-typedef struct packed {
+typedef struct {
    Point2D side [8];
-   logic       size [2:0];
+   logic [2:0] size;
 } Polygon2D;
 
 typedef struct packed {

@@ -4,8 +4,6 @@
 
 
 `include "defines_package.vh"
-//`include "lpmdivide.v"
-//`include "alt_sqrt.v"
 
 
 module triangle_area
@@ -77,19 +75,6 @@ triangle_area AREA3
 
 longint num;
 assign num = (triangle.p.z * a1 + triangle.q.z * a2 + triangle.r.z * a3) / a;
-//assign num = triangle.p.z * a1 / a + triangle.q.z * a2 / a + triangle.r.z * a3 / a;
-
-//lpmdivide DIV
-//	(
-//		.denom(a),
-//		.numer(num),
-//		.quotient(zb)	
-//	);
-
-//alt_sqrt	alt_sqrt_inst (
-//	.radical ( {a,num} ),
-//	.q ( zb )
-//	);
 
 assign z = num[7:0];
 

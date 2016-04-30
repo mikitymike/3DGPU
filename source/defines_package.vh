@@ -14,7 +14,7 @@
 `define COLOR_BITS 		 24
 `define LAYER_SIZE                8
 // CHUNK_SIZE must evenly divide HEIGHT
-`define CHUNK_SIZE		  `HEIGHT
+`define CHUNK_SIZE		  8
 `define NUM_CF_MODS		(`HEIGHT / `CHUNK_SIZE)
 
 

@@ -15,7 +15,7 @@
 `define LAYER_SIZE                8
 // CHUNK_SIZE must evenly divide HEIGHT
 `define CHUNK_SIZE		  4
-`define NUM_CF_MODS		(HEIGHT / CHUNK_SIZE)
+`define NUM_CF_MODS		(`HEIGHT / `CHUNK_SIZE)
 
 
 typedef struct packed {

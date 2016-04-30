@@ -10,5 +10,6 @@
 `define XMAX 640
 `define YMAX 480
 `define YMIN 0
-
+`define ZMIN 0
+`define ZMAX 255
 `endif

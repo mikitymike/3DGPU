@@ -15,20 +15,20 @@ module bounds_check
    output logic out_of_bounds
    );
 
-   Points2D points [9];
+   shortint points [9];
    logic 	oob[9];
    
-   points[0] = texel_in.p.x;
-   points[1] = texel_in.q.x;
-   points[2] = texel_in.r.x;
-   points[3] = texel_in.p.y;
-   points[4] = texel_in.q.y;
-   points[5] = texel_in.r.y;
-   points[6] = texel_in.p.z;
-   points[7] = texel_in.q.z;
-   points[8] = texel_in.r.z;   
+   assign points[0] = texel_in.p.x;
+   assign points[1] = texel_in.q.x;
+   assign points[2] = texel_in.r.x;
+   assign points[3] = texel_in.p.y;
+   assign points[4] = texel_in.q.y;
+   assign points[5] = texel_in.r.y;
+   assign points[6] = texel_in.p.z;
+   assign points[7] = texel_in.q.z;
+   assign points[8] = texel_in.r.z;   
 
-   genvar i;
+   shortint i;
    
    always_comb begin
 
@@ -39,8 +39,8 @@ module bounds_check
       for(i=6;i<9;i++)
 	oob[i] = (points[i] < `ZMIN) || (points[i] > `ZMAX);
 
-      out_of_bounds = |oob;
-      
-      
+      out_of_bounds = oob[0]|oob[1]|oob[2]|oob[3]|oob[4]|oob[5]|oob[6]|oob[7]|oob[8];
+            
    end // always_comb begin
 
+endmodule

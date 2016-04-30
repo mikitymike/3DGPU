@@ -16,12 +16,12 @@ include /home/ecegrid/a/ece337/Course_Prod/course_make_vars
 # (do not include the source folder in the name)
 # NOTE: YOU WILL NEED TO SET THIS VARIABLE'S VALUE WHEN WORKING WITH HEIRARCHICAL DESIGNS
 # AND THE AUTOMATED GRADING SYSTEM
-COMPONENT_FILES	:= bresen.sv rasterizer_controller.sv ortho_proj.sv wireframe_plot.sv colorfill.sv z_interpolation colorloop.sv rasterizer.sv 
+COMPONENT_FILES	:= bresen.sv rasterizer_controller.sv ortho_proj.sv wireframe_plot.sv colorfill.sv z_interpolation colorloop.sv rasterizer.sv zbuffer_sram.sv frame_buffer_transfer.sv multi_channel_double_sram.sv 
 
 # Specify the name of the top level file (do not include the source folder in the name)
 # NOTE: YOU WILL NEED TO SET THIS VARIABLE'S VALUE WHEN WORKING WITH HEIRARCHICAL DESIGNS
 # AND THE AUTOMATED GRADING SYSTEM
-TOP_LEVEL_FILE	:= 3dgpu.sv
+TOP_LEVEL_FILE	:= gpu.sv
 
 # Specify the filepath of the test bench you want to use (ie. tb_top_level.sv)
 # (do not include the source folder in the name)
@@ -41,16 +41,7 @@ GATE_LIB		:= $(AMI_05_LIB)
 S_WORK_LIB := source_work
 M_WORK_LIB := mapped_work
 
-<<<<<<< Updated upstream
-<<<<<<< HEAD
-#FPGA_MF_LIB := "/home/ecegrid/a/ece337/Course_Prod/FPGA_Libs/altera_mf_ver"
-#DIVIDE_LIB := "/package/eda/altera/altera14.0/ip/altera/megafunctions"
-=======
 FPGA_MF_LIB := "/home/ecegrid/a/ece337/Course_Prod/FPGA_Libs/altera_mf_ver"
->>>>>>> 2824b5cdb6414bfa90d8ff9ef57d12b89f13179e
-=======
-FPGA_MF_LIB := "/home/ecegrid/a/ece337/Course_Prod/FPGA_Libs/altera_mf_ver"
->>>>>>> Stashed changes
 
 LIB_CREATE	:= vlib
 COMPILE 		:= vlog -sv

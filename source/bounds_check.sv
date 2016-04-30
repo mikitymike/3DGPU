@@ -32,8 +32,6 @@ module bounds_check
    
    always_comb begin
 
-      
-      
       for(i=0;i<3;i++)
 	oob[i] = (points[i] < `XMIN) || (points[i] > `XMAX);
       for(i=3;i<6;i++)

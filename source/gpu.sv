@@ -7,14 +7,6 @@ module gpu
 (
 	input wire clk,
 	input wire n_rst,
-	/*
-	input wire [31:0] data_in,
-	input wire data_ready,
-	output wire data_read,
-	output wire [31:0] data_out,
-	output wire data_ready_out,
-	input wire write_buffer_full
-	*/
 	input Triangle3D triangle,
 	input Color color,
 	input wire tri_ready,
@@ -22,7 +14,8 @@ module gpu
 	output wire cf_done,
 	output wire transfer_done,
 	input wire ready_for_data,
-	output [31:0] data_out
+	output wire [31:0] data_out,
+	input wire new_frame
 );
 
 
@@ -46,6 +39,17 @@ wire zb_write_enables [`NUM_CF_MODS];
 wire [(`LAYER_SIZE-1):0] zb_data_ins [`NUM_CF_MODS];
 wire [(`SRAM_ADDR_SIZE-1):0] zb_addrs [`NUM_CF_MODS];
 wire [(`LAYER_SIZE-1):0] zb_data_outs [`NUM_CF_MODS];
+
+wire cl_write_enables [`NUM_CF_MODS];
+assign zb_write_enables = cl_write_enables;
+assign fb_write_enables = cl_write_enables;
+
+
+wire wf_flip;
+assign wf_flip = ras_done;
+assign fb_flip = new_frame;
+
+
 
 rasterizer RASTERIZER
 	(
@@ -77,8 +81,6 @@ multi_channel_double_sram #(1, `NUM_CF_MODS, `WIREFRAME_ADDR_SIZE, 1, `WIDTH * `
 	); 
 
 
-
-
 multi_channel_double_sram #(`NUM_CF_MODS, 1, `FRAME_BUFFER_ADDR_SIZE, `COLOR_BITS, `WIDTH * `HEIGHT) FRAME_BUFFER_SRAM 
 	(
 		.clk(clk),
@@ -104,12 +106,11 @@ zbuffer_sram #(`NUM_CF_MODS, `SRAM_ADDR_SIZE, `LAYER_SIZE, `WIDTH * `HEIGHT) ZBU
 	);
 
 
+
 wire cl_done [`NUM_CF_MODS];
 logic tmps [`NUM_CF_MODS];
+assign cf_done = tmps[`NUM_CF_MODS-1];
 
-wire cl_write_enables [`NUM_CF_MODS];
-assign zb_write_enables = cl_write_enables;
-assign fb_write_enables = cl_write_enables;
 
 genvar i;
 generate
@@ -123,26 +124,22 @@ generate
 				.height((i*`CHUNK_SIZE)),
 				.rgb_val(rtoc_color),
 				.ver(rtoc_tri),
-				.color_en(ras_done), // start signal
+				.color_en(ras_done),
 				.sram_addr(wf_read_addrs[i]),
 				.zbuf_addr(zb_addrs[i]),
 				.data_out(zb_data_ins[i]),
 				.write_en(cl_write_enables[i]),
 				.done(cl_done[i]),
 				.data_out_color(fb_data_ins[i]),
-				.fb_addr(fb_write_addrs[i])		
+				.fb_addr(fb_write_addrs[i]),
+				.all_done(cf_done),
+				.new_frame(new_frame)	
 			);
-		if(i == 0) begin
-			assign tmps[i] = cl_done[i];
-		end
-		else begin
-			assign tmps[i] = cl_done[i] & tmps[i-1];
-		end
+		
+		
+		assign tmps[i] = cl_done[i] & (i ? tmps[i-1] : 1);
 	end
 endgenerate
-
-// TODO: make colorloops/fills hold done until all are done then go back to IDLE
-assign cf_done = tmps[`NUM_CF_MODS-1];
 
 
 frame_buffer_transfer FBT
@@ -155,4 +152,5 @@ frame_buffer_transfer FBT
 		.addr(fb_read_addrs[0]),
 		.color(fb_data_outs[0])
 	);
+
 endmodule

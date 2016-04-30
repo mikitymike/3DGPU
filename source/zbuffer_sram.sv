@@ -29,8 +29,8 @@ for(i = 0; i < CHANNELS; i++) begin
 	always_ff @(posedge clk, negedge n_rst) begin
 		if(write_enables[i]) begin
 			ram[addrs[i]] <= data_ins[i];
-		end
-			data_outs[i] <= ram[addrs[i]];
+		end 
+		data_outs[i] <= ram[addrs[i]];
 	end
 end
 endgenerate

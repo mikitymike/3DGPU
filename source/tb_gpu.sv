@@ -24,6 +24,7 @@ module tb_gpu
 	reg tb_transfer_done;
 	reg tb_ready_for_data;
 	reg [31:0] tb_data_out;
+	reg tb_new_frame;
 
 	gpu DUT
 		(
@@ -36,7 +37,8 @@ module tb_gpu
 			.cf_done(tb_cf_done),
 			.transfer_done(tb_transfer_done),
 			.ready_for_data(tb_ready_for_data),
-			.data_out(tb_data_out)
+			.data_out(tb_data_out),
+			.new_frame(tb_new_frame)
 		);
 
 	always begin
@@ -56,20 +58,21 @@ module tb_gpu
 	initial begin
 		$display("Intializing triangle values.");	
 		// init triangles and colors	
-		triangles[0].p = {x:0, y:0, z:0};
-		triangles[0].q = {x:0, y:`HEIGHT-1, z:0};
-		triangles[0].r = {x:`WIDTH-1, y:`HEIGHT-1, z:0};
-		colors[0] = {r:0, g:0, b:0};
+		triangles[0].p = {x:0, y:0, z:10};
+		triangles[0].q = {x:0, y:`HEIGHT-1, z:10};
+		triangles[0].r = {x:`WIDTH-1, y:`HEIGHT-1, z:10};
+		colors[0] = {r:255, g:0, b:0};
 
-		triangles[1].p = {x:0, y:0, z:0};
-		triangles[1].q = {x:`WIDTH-1, y:0, z:0};
-		triangles[1].r = {x:`WIDTH-1, y:`HEIGHT-1, z:0};
-		colors[1] = {r:255, g:255, b:255};	
+		triangles[1].p = {x:0, y:`HEIGHT-1, z:20};
+		triangles[1].q = {x:`WIDTH-1, y:`HEIGHT-1, z:20};
+		triangles[1].r = {x:`WIDTH/2, y:0, z:20};
+		colors[1] = {r:0, g:255, b:0};	
 		
 		// initial_values
 		tb_ready_for_data = 0;
 		tb_tri_ready = 0;
-		
+		tb_new_frame = 0;
+
 		$display("Resetting GPU.");	
 		// reset
 		tb_n_rst = 1;
@@ -79,6 +82,10 @@ module tb_gpu
 		tb_n_rst = 1;
 		#DELAY;
 
+		tb_new_frame = 1;
+		@(posedge tb_clk);
+		tb_new_frame = 0;
+
 		for(test = 0; test < NUM_TRIANGLES; test++) begin
 			// setup current values
 			tb_triangle = triangles[test];
@@ -86,39 +93,56 @@ module tb_gpu
 			$display("Starting round.");	
 			// begin
 			tb_tri_ready = 1;
-			@(posedge tb_tri_read)
+			@(posedge tb_tri_read);
 			tb_tri_ready = 0;
 
 			// wait for completion
-			@(posedge tb_cf_done)
-			$display("Reading image data from frame buffer.");	
-			// write data to array
-			tb_ready_for_data = 1;
-			for(i = 0; i < `HEIGHT*`WIDTH; i++) begin
-				@(posedge tb_clk);
-				image_data[i] = tb_data_out[23:0]; 
-			end
-				
-			@(posedge tb_transfer_done);
-			$display("Frame buffer transfer complete.");
-			tb_ready_for_data = 0;
-			// write data to file
-			$display("Writing data to file.");
-			fp = $fopen($psprintf("gpu%1d.ppm", test), "w");
-			$fwrite(fp, "P3\n");
-			$fwrite(fp, "# Wireframe and Colorfill\n");
-			$fwrite(fp, "%d %d\n", `WIDTH, `HEIGHT);
-			for(i = 0; i < `HEIGHT; i++) begin
-				for(j = 0; j < `WIDTH-1; j++) begin
-					tc = image_data[i*`WIDTH+j];		
-					$fwrite(fp, "%d %d %d ", tc.r, tc.g, tc.b);
-				end
-				tc = image_data[i*`WIDTH+j];		
-				$fwrite(fp, "%d %d %d\n", tc.r, tc.g, tc.b);
-			end
-			$fclose(fp);
-			$display("File written.");
+			@(posedge tb_cf_done);
+							
 		end
+		
+		tb_new_frame = 1;
+		@(posedge tb_clk);
+		tb_new_frame = 0;
+		
+		$display("Reading image data from frame buffer.");	
+		// write data to array
+		tb_ready_for_data = 1;
+		for(i = 0; i < `HEIGHT*`WIDTH; i++) begin
+			@(posedge tb_clk);
+			image_data[i] = tb_data_out[23:0]; 
+		end
+
+		@(posedge tb_transfer_done);
+		$display("Frame buffer transfer complete.");
+		tb_ready_for_data = 0;
+		// write data to file
+		$display("Writing data to file.");
+		fp = $fopen("gpu.ppm", "w");
+		$fwrite(fp, "P3\n");
+		$fwrite(fp, "# Wireframe and Colorfill\n");
+		$fwrite(fp, "%d %d\n", `WIDTH, `HEIGHT);
+		$fwrite(fp, "255\n");
+		for(i = 0; i < `HEIGHT; i++) begin
+			for(j = 0; j < `WIDTH-1; j++) begin
+			//	tc = image_data[i*`WIDTH+j];		
+			//	$fwrite(fp, "%d %d %d ", tc.r, tc.g, tc.b);
+			//end
+			//tc = image_data[i*`WIDTH+j];		
+			//$fwrite(fp, "%d %d %d\n", tc.r, tc.g, tc.b);
+				$fwrite(fp, "%d ", image_data[i*`WIDTH+j][23:16]);
+				$fwrite(fp, "%d ", image_data[i*`WIDTH+j][15:8]);
+				$fwrite(fp, "%d ", image_data[i*`WIDTH+j][7:0]); // need to write r g b				
+			end
+			$fwrite(fp, "%d ", image_data[i*`WIDTH+j][23:16]);
+			$fwrite(fp, "%d ", image_data[i*`WIDTH+j][15:8]);
+			$fwrite(fp, "%d\n", image_data[i*`WIDTH+j][7:0]); // need to write r g b	
+		
+		
+		end
+		$fclose(fp);
+		$display("File written.");
+
 	end
 
 endmodule

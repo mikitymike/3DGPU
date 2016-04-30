@@ -94,7 +94,7 @@ module texel_assembler
 	    nextstate = T6;
 	READ_WAIT:
 	  if (texel_read == 1'b1)
-	    nextstate = IDLE;
+	    nextstate = END_CHK;
 	  else
 	    nextstate = READ_WAIT;
 	END_CHK:

@@ -120,20 +120,23 @@ module tb_clip_split();
 
 
       begin
+	 
   	 for(i=0; i<6; i=i+1) begin
 	    tb_test_case += 1;
 	    tb_ahb_buffer = triangle_vector[i];
 	    tb_ahb_data_available = 1'b1;
 	    tb_expected_triangle_ready = 1'b0;
 	    tb_expected_ahb_user_read_buffer = 1'b1;
-	    if(i==7) begin
+	    if(i==5) begin
 	       tb_expected_triangle_ready = 1'b1;
 	       tb_expected_ahb_user_read_buffer = 1'b0;
 	    end
 	    if(oob)
 	      tb_expected_triangle_ready = 1'b0;
-	    check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);
+	    
 	    @(negedge tb_clk);
+	    check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);
+	    tb_ahb_data_available = 1'b0;
 	 end // for (i=0; i<6; i=i+1)
       end
    endtask // for
@@ -263,37 +266,141 @@ module tb_clip_split();
 	   send_frame_start();
 
 	   @(negedge tb_clk);
-  
+	   
 	   send_triangle(tb_expected_triangle_vertices_out, tb_expected_triangle_color_out);
-	  
 	   
-	   if(oob)
-	     check_texel(tb_expected_triangle_vertices_out, tb_expected_triangle_color_out);
+	   tb_expected_ahb_user_read_buffer = 1'b0;
 
-	   @(negedge tb_clk);
-	   @(negedge tb_clk);
-	   @(negedge tb_clk);
-	   @(negedge tb_clk);
-	   @(negedge tb_clk);
 	   
-	   if(oob)
-	     tb_expected_ahb_user_read_buffer = 1'b1;
-	   else
-	     tb_expected_ahb_user_read_buffer = 1'b0;
 	   
 	   check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);
 
-	   if(!oob) begin
-	   tb_triangle_read = 1'b1;
-	   	   
 	   @(negedge tb_clk);
 
-	   tb_triangle_read = 1'b0;
-	   end
+	   check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);
+
+	   tb_ahb_data_available = 1'b1;
+	   	   
+	   @(negedge tb_clk);
 	   
 	   tb_expected_triangle_ready = 1'b0;
 	   tb_expected_ahb_user_read_buffer = 1'b1;
-	   check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);	   
+	   check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);
+
+
+	   //In bounds triangle
+	   tb_expected_triangle_vertices_out.p.x = 1;
+	   tb_expected_triangle_vertices_out.p.y = 1;
+	   tb_expected_triangle_vertices_out.p.z = 1;
+	   tb_expected_triangle_vertices_out.q.x = 250;
+	   tb_expected_triangle_vertices_out.q.y = 250;
+	   tb_expected_triangle_vertices_out.q.z = 250;
+	   tb_expected_triangle_vertices_out.r.x = 250;
+	   tb_expected_triangle_vertices_out.r.y = 1;
+	   tb_expected_triangle_vertices_out.r.z = 1;
+
+	   oob = 0;
+	   
+	   if ((tb_expected_triangle_vertices_out.p.x < `XMIN) || (tb_expected_triangle_vertices_out.p.x > `XMAX))
+	     oob = 1;
+	   if ((tb_expected_triangle_vertices_out.p.y < `YMIN) || (tb_expected_triangle_vertices_out.p.y > `YMAX))
+	     oob = 1;
+	   if ((tb_expected_triangle_vertices_out.p.z < `ZMIN) || (tb_expected_triangle_vertices_out.p.z > `ZMAX))
+	     oob = 1;
+	   if ((tb_expected_triangle_vertices_out.q.x < `XMIN) || (tb_expected_triangle_vertices_out.q.x > `XMAX))
+	     oob = 1;
+	   if ((tb_expected_triangle_vertices_out.q.y < `YMIN) || (tb_expected_triangle_vertices_out.q.y > `YMAX))
+	     oob = 1;
+	   if ((tb_expected_triangle_vertices_out.q.z < `ZMIN) || (tb_expected_triangle_vertices_out.q.z > `ZMAX))
+	     oob = 1;
+	   if ((tb_expected_triangle_vertices_out.r.x < `XMIN) || (tb_expected_triangle_vertices_out.r.x > `XMAX))
+	     oob = 1;
+	   if ((tb_expected_triangle_vertices_out.r.y < `YMIN) || (tb_expected_triangle_vertices_out.r.y > `YMAX))
+	     oob = 1;
+	   if ((tb_expected_triangle_vertices_out.r.z < `ZMIN) || (tb_expected_triangle_vertices_out.r.z > `ZMAX))
+	     oob = 1;
+	   
+	   $info("start test 2**********************************************************************");
+	   
+	   send_triangle(tb_expected_triangle_vertices_out, tb_expected_triangle_color_out); 
+
+	   $info("send triangle done**********************************************************************");
+	   
+	   check_texel(tb_expected_triangle_vertices_out, tb_expected_triangle_color_out);
+	   $info("check texel**********************************************************************");
+	   @(negedge tb_clk);
+	   @(negedge tb_clk);
+	   @(negedge tb_clk);
+	   @(negedge tb_clk);
+	   @(negedge tb_clk);
+
+	   check_texel(tb_expected_triangle_vertices_out, tb_expected_triangle_color_out);
+	   $info("check texel 2 done**********************************************************************");
+	   tb_expected_ahb_user_read_buffer = 1'b0;
+	   tb_expected_triangle_ready = 1'b1;
+	   
+	   check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);
+	   $info("check flags**********************************************************************");
+	   
+	   tb_triangle_read = 1'b1;
+	      
+	   @(negedge tb_clk);
+
+	   tb_triangle_read = 1'b0;
+	   	   
+	   tb_expected_triangle_ready = 1'b0;
+	   tb_expected_ahb_user_read_buffer = 1'b0;
+	   
+	   check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);
+	   $info("check flags 2**********************************************************************");
+	   
+	   send_frame_end();
+	   @(negedge tb_clk);
+
+	   tb_expected_triangle_ready = 1'b0;
+	   tb_expected_ahb_user_read_buffer = 1'b1;
+	   
+	   check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);
+	   $info("last check flags**********************************************************************");
+
+
+	   $info("overall test**********************************************************************");
+
+	   tb_expected_triangle_ready = 1'b0;
+	   tb_expected_ahb_user_read_buffer = 1'b1;
+	   
+	   send_frame_start();
+	   @(negedge tb_clk);
+	   
+	   send_triangle(tb_expected_triangle_vertices_out, tb_expected_triangle_color_out);
+	   tb_ahb_data_available = 1'b1;
+	   tb_triangle_read = 1;
+	   @(negedge tb_clk);
+	   
+	   send_frame_end();
+	   @(negedge tb_clk);
+	   tb_ahb_data_available = 1'b0;
+	   tb_expected_ahb_user_read_buffer = 1'b1;
+	   tb_triangle_read = 0;
+
+	   tb_expected_triangle_ready = 1'b0;	   
+	   check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);
+
+	   @(negedge tb_clk);
+	   @(negedge tb_clk);
+	   @(negedge tb_clk);
+	   @(negedge tb_clk);
+
+	   check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);
+
+	   tb_ahb_data_available = 1'b0;
+	   	   
+	   @(negedge tb_clk);
+	   
+	   tb_expected_triangle_ready = 1'b0;
+	   tb_expected_ahb_user_read_buffer = 1'b1;
+	   check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);
+	   
 	end // block: TEST_PROC
    
 endmodule

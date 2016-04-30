@@ -11,11 +11,14 @@
 module cs_rcu
   (
    input logic 	clip_triangle,
-   input logic texel_ready,
-   output logic triangle_ready
+   input logic 	texel_ready,
+   input logic 	triangle_read,
+   output logic triangle_ready,
+   output logic texel_read
    );
 
    assign triangle_ready = texel_ready && !clip_triangle;
-
+   assign texel_read = triangle_read || (texel_ready && clip_triangle);
+   
 endmodule // cs_rcu
 

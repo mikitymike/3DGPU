@@ -102,7 +102,7 @@ always_comb begin
 			end
 		end
 		FILL: begin
-			if(left > right) begin
+			if(left >= right) begin
 				next = DONE;
 			end
 			else begin

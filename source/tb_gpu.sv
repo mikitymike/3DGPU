@@ -130,11 +130,11 @@ module tb_gpu
 		points[2] = {x:`WIDTH*7/8, y:`HEIGHT-1, z:30};
 		points[3] = {x:`WIDTH/2, y:`HEIGHT/8, z:40};
 		
-		points[4] = {x:`WIDTH/8+30, y:`HEIGHT/2, z:50};
+		points[4] = {x:`WIDTH*7/16, y:`HEIGHT/2, z:50};
 		points[5] = {x:`WIDTH/8, y:`HEIGHT/8, z:30};
-		points[6] = {x:`WIDTH/8, y:`HEIGHT*7/8, z:30};
+		points[6] = {x:`WIDTH*3/8, y:`HEIGHT*7/8, z:30};
 		points[7] = {x:`WIDTH*7/8, y:`HEIGHT/2, z:40};
-
+			
 		triangles[0].p = points[0];
 		triangles[0].q = points[1];
 		triangles[0].r = points[2];
@@ -176,7 +176,7 @@ module tb_gpu
 		colors[5] = {r:0, g:255, b:255};	
 		colors[6] = {r:255, g:0, b:255};	
 		colors[7] = {r:255/2, g:255/2, b:255/2};	
-
+		
 		// initial_values
 		tb_ready_for_data = 0;
 		tb_ahb_buffer = 0;

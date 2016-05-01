@@ -1,7 +1,7 @@
-/*
-	Rasterizer Control Unit.
-*/
-
+// File name:   rasterizer_controller.sv
+// Author:      Zach Miller
+// Version:     1.0  Initial Design Entry
+// Description: Rasterizer Controller
 
 `include "defines_package.vh"
 
@@ -10,7 +10,6 @@ module rasterizer_controller
 (
 	input wire clk,
 	input wire n_rst,
-	input wire start,
 	
 	input Triangle3D itri3,
 	output Triangle3D otri3,
@@ -26,7 +25,7 @@ module rasterizer_controller
 	output Point2D clear_point,
 	
 	output wire done,
-
+	input wire cf_ready,
 	output wire tri_read,
 	input wire tri_ready
 );
@@ -78,8 +77,10 @@ always_comb begin
 	next_color = color;
 	case(state)
 		IDLE: begin
-			if(tri_ready) begin
-				next_state = GET_TRIANGLE;
+			if(cf_ready) begin
+				if(tri_ready) begin
+					next_state = GET_TRIANGLE;
+				end
 			end
 			else begin
 				next_state = IDLE;
@@ -90,7 +91,7 @@ always_comb begin
 			next_tri3 = itri3;
 			next_color = icolor;
 		end
-		CLEAR: begin
+		CLEAR: begin // Clear the current values in the wireframe buffer
 			if(cleary == `HEIGHT) begin
 				next_state = SETUP1;
 			end
@@ -106,12 +107,12 @@ always_comb begin
 				end
 			end
 		end
-		SETUP1: begin
+		SETUP1: begin // put triangles on the line
 			next_state = DRAW1;
 			p = triangle.p;
 			q = triangle.q;
 		end
-		DRAW1: begin
+		DRAW1: begin // initiate line drawing algorithm
 			p = triangle.p;
 			q = triangle.q;
 			if(bresen_done) begin
@@ -121,7 +122,7 @@ always_comb begin
 				next_state = DRAW1;
 			end
 		end
-		SETUP2: begin
+		SETUP2: begin // start 2nd line draw
 			next_state = DRAW2;
 			p = triangle.q;
 			q = triangle.r;
@@ -136,7 +137,7 @@ always_comb begin
 				next_state = DRAW2;	
 			end			
 		end
-		SETUP3: begin
+		SETUP3: begin // start 3rd line draw
 			next_state = DRAW3;
 			p = triangle.r;
 			q = triangle.p;

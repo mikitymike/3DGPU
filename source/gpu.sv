@@ -7,21 +7,29 @@ module gpu
 (
 	input wire clk,
 	input wire n_rst,
-	input Triangle3D triangle,
-	input Color color,
-	input wire tri_ready,
-	output wire tri_read,
 	output wire cf_done,
+	input wire new_frame,
+	// AHB Out	
 	output wire transfer_done,
 	input wire ready_for_data,
 	output wire [31:0] data_out,
-	input wire new_frame
+	// AHB In
+	input wire [31:0] ahb_buffer,
+	input wire ahb_data_available,
+	output wire ahb_user_read_buffer
+
 );
+
+Triangle3D triangle;
+Color color;
+wire tri_ready;
+wire tri_read;
 
 
 Triangle3D rtoc_tri;
 Color rtoc_color;
 wire ras_done;
+wire cf_ready;
 
 wire wf_write_enables [1];
 wire wf_data_ins [1];
@@ -63,6 +71,7 @@ rasterizer RASTERIZER
 		.wf_data(wf_data_ins[0]),
 		.addr(wf_write_addrs[0]),
 		.done(ras_done),
+		.cf_ready(cf_ready),
 		.tri_read(tri_read),
 		.tri_ready(tri_ready)
 	);
@@ -108,9 +117,11 @@ zbuffer_sram #(`NUM_CF_MODS, `SRAM_ADDR_SIZE, `LAYER_SIZE, `WIDTH * `HEIGHT) ZBU
 
 
 wire cl_done [`NUM_CF_MODS];
-logic tmps [`NUM_CF_MODS];
-assign cf_done = tmps[`NUM_CF_MODS-1];
-
+wire cl_ready [`NUM_CF_MODS];
+logic tmps1 [`NUM_CF_MODS];
+logic tmps2 [`NUM_CF_MODS];
+assign cf_done = tmps1[`NUM_CF_MODS-1];
+assign cf_ready = tmps2[`NUM_CF_MODS-1];
 
 genvar i;
 generate
@@ -133,11 +144,13 @@ generate
 				.data_out_color(fb_data_ins[i]),
 				.fb_addr(fb_write_addrs[i]),
 				.all_done(cf_done),
-				.new_frame(new_frame)	
+				.new_frame(new_frame),
+				.ready(cl_ready[i])	
 			);
 		
 		
-		assign tmps[i] = cl_done[i] & (i ? tmps[i-1] : 1);
+		assign tmps1[i] = cl_done[i] & (i ? tmps1[i-1] : 1);
+		assign tmps2[i] = cl_ready[i] & (i ? tmps2[i-1] : 1);
 	end
 endgenerate
 
@@ -152,5 +165,21 @@ frame_buffer_transfer FBT
 		.addr(fb_read_addrs[0]),
 		.color(fb_data_outs[0])
 	);
+
+
+
+clip_split CLIP_SPLIT
+	(
+		.clk(clk),
+		.n_rst(n_rst),
+		.ahb_buffer(ahb_buffer),
+		.ahb_data_available(ahb_data_available),
+		.ahb_user_read_buffer(ahb_user_read_buffer),
+		.triangle_read(tri_read),
+		.triangle_vertices_out(triangle),
+		.triangle_color_out(color),
+		.triangle_ready(tri_ready)
+	);
+
 
 endmodule

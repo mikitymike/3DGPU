@@ -18,7 +18,8 @@ module colorloop
 	output reg [(`LAYER_SIZE-1):0] data_out,
 	output Color data_out_color,
 	input wire all_done,
-	input wire new_frame
+	input wire new_frame,
+	output wire ready
 );
 
 
@@ -34,7 +35,7 @@ logic cf_color_en;
 logic [(`LAYER_SIZE-1):0] cf_data_out;
 logic cf_write_en;
 
-
+assign ready = (curr == IDLE);
 
 always_ff @(posedge clk, negedge n_rst)  begin
 	if(!n_rst) begin

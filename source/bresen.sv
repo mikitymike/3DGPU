@@ -1,3 +1,7 @@
+
+
+
+
 /*
 	Bresenham's line algorithm.
 */
@@ -27,10 +31,10 @@ wire down, right;
 
 assign pdx = q.x - p.x;
 assign pdy = q.y - p.y;
-
+// direction of movement
 assign right = ~(pdx[15]);
 assign down = ~(pdy[15]);
-
+// set the step values accordingly
 assign dx = !right ? -pdx : pdx;
 assign dy =  down  ? -pdy : pdy;
 
@@ -65,16 +69,16 @@ always_comb begin
 				next_state = IDLE;
 			end
 		end
-		SETUP: begin
+		SETUP: begin // setup initial values
 			next_state = PLOT;
 			next_err = dx + dy;
 			next_x = p.x;
 			next_y = p.y;
 		end
-		PLOT: begin
+		PLOT: begin // set point in wireframe
 			next_state = CHECK;
 		end
-		CHECK: begin
+		CHECK: begin // Check for end of line
 			if(x == q.x && y == q.y) begin
 				next_state = DONE;
 			end
@@ -82,7 +86,7 @@ always_comb begin
 				next_state = STEP;
 			end
 		end
-		STEP: begin
+		STEP: begin // move along the line
 			next_state = PLOT;
 			if(e2 > dy && e2 < dx) begin
 				next_err = err + dy + dx;

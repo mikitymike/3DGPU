@@ -1,6 +1,7 @@
-/*
-	Triangle Rasterizer Structure.
-*/
+// File name:   rasterizer.sv
+// Author:      Zach Miller
+// Version:     1.0  Initial Design Entry
+// Description: Triangle Rasterization module
 
 
 `include "defines_package.vh"
@@ -10,7 +11,6 @@ module rasterizer
 (
 	input wire clk,
 	input wire n_rst,
-	input wire start,
 	input Triangle3D itriangle,
 	output Triangle3D otriangle,
 	input Color icolor,
@@ -19,7 +19,7 @@ module rasterizer
 	output wire wf_data,
 	output wire [(`WIREFRAME_ADDR_SIZE-1):0] addr,
 	output wire done,
-	
+	input wire cf_ready,	
 	output wire tri_read,
 	input wire tri_ready
 );
@@ -38,7 +38,6 @@ rasterizer_controller CONTROLLER
 	(
 		.clk(clk),
 		.n_rst(n_rst),
-		.start(start),
 		
 		.itri3(itriangle),
 		.otri3(otriangle),
@@ -53,7 +52,7 @@ rasterizer_controller CONTROLLER
 		.clear_point(clear_point),
 		.clear(clear),
 		.done(done),
-		
+		.cf_ready(cf_ready),	
 		.tri_read(tri_read),
 		.tri_ready(tri_ready)
 	);

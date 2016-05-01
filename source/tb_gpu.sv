@@ -12,7 +12,7 @@ module tb_gpu
 ();
 	localparam CLK_PERIOD = 20;
 	localparam DELAY = 6;
-	localparam NUM_TRIANGLES = 4;
+	localparam NUM_TRIANGLES = 8;
 	localparam FRAME_START = 32'd0;
    	localparam FRAME_END = 32'd1;
 
@@ -100,28 +100,18 @@ module tb_gpu
 	      begin
 		 
 		 for(i = 0; i < 6; i = i + 1) begin
-		    // tb_test_case += 1;
 		    tb_ahb_buffer = triangle_vector[i];
 		    tb_ahb_data_available = 1'b1;
-		    // tb_expected_triangle_ready = 1'b0;
-		    // tb_expected_ahb_user_read_buffer = 1'b1;
-		    // if(i==5) begin
-		    //    tb_expected_triangle_ready = 1'b1;
-		    //    tb_expected_ahb_user_read_buffer = 1'b0;
-		    // end
-		    // if(oob)
-		    //   tb_expected_triangle_ready = 1'b0;
-		    
+		    		    
 		    @(negedge tb_clk);
-		    // check_flags(tb_expected_triangle_ready,tb_expected_ahb_user_read_buffer);
 		    tb_ahb_data_available = 1'b0;
 		 end // for (i=0; i<6; i=i+1)
 	      end
 	   endtask // for
 
-	Triangle3D triangles [4];
-	Color colors [4];
-	Point3D points [4];
+	Triangle3D triangles [NUM_TRIANGLES];
+	Color colors [NUM_TRIANGLES];
+	Point3D points [8];
 
 	integer triangle_count = 0;
 
@@ -135,20 +125,20 @@ module tb_gpu
 	initial begin
 		$display("Intializing triangle values.");	
 		// init triangles and colors	
-		/*
-		points[0] = {x:`WIDTH/2, y:`HEIGHT/2-30, z:50};
-		points[1] = {x:`WIDTH/2-100, y:`HEIGHT/2, z:30};
-		points[2] = {x:`WIDTH/2+100, y:`HEIGHT/2, z:30};
-		points[3] = {x:`WIDTH/2, y:`HEIGHT/4, z:40};
-		*/
 		points[0] = {x:`WIDTH/2, y:`HEIGHT-50, z:50};
 		points[1] = {x:`WIDTH/8, y:`HEIGHT-1, z:30};
 		points[2] = {x:`WIDTH*7/8, y:`HEIGHT-1, z:30};
 		points[3] = {x:`WIDTH/2, y:`HEIGHT/8, z:40};
 		
+		points[4] = {x:`WIDTH/8+30, y:`HEIGHT/2, z:50};
+		points[5] = {x:`WIDTH/8, y:`HEIGHT/8, z:30};
+		points[6] = {x:`WIDTH/8, y:`HEIGHT*7/8, z:30};
+		points[7] = {x:`WIDTH*7/8, y:`HEIGHT/2, z:40};
+
 		triangles[0].p = points[0];
 		triangles[0].q = points[1];
 		triangles[0].r = points[2];
+		
 		triangles[1].p = points[0];
 		triangles[1].q = points[1];
 		triangles[1].r = points[3];
@@ -160,11 +150,33 @@ module tb_gpu
 		triangles[3].p = points[1];
 		triangles[3].q = points[2];
 		triangles[3].r = points[3];
+	
+		triangles[4].p = points[4];
+		triangles[4].q = points[5];
+		triangles[4].r = points[7];
+		
+		triangles[5].p = points[4];
+		triangles[5].q = points[6];
+		triangles[5].r = points[7];
+		
+		triangles[6].p = points[5];
+		triangles[6].q = points[6];
+		triangles[6].r = points[7];
+		
+		triangles[7].p = points[4];
+		triangles[7].q = points[5];
+		triangles[7].r = points[6];
+
+		
 		colors[0] = {r:255, g:0, b:0};
 		colors[1] = {r:0, g:255, b:0};	
 		colors[2] = {r:0, g:0, b:255};	
 		colors[3] = {r:255, g:255, b:255};	
-			
+		colors[4] = {r:255, g:255, b:0};
+		colors[5] = {r:0, g:255, b:255};	
+		colors[6] = {r:255, g:0, b:255};	
+		colors[7] = {r:255/2, g:255/2, b:255/2};	
+
 		// initial_values
 		tb_ready_for_data = 0;
 		tb_ahb_buffer = 0;

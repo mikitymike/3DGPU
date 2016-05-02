@@ -20,7 +20,6 @@ module tb_rasterizer
 	
 	reg tb_clk;
 	reg tb_n_rst;
-	reg tb_start;
 	Triangle3D tb_i_triangle;
 	Triangle3D tb_o_triangle;
 	Color tb_i_color;
@@ -31,7 +30,7 @@ module tb_rasterizer
 	reg tb_done;
 
 	reg tb_tri_read, tb_tri_ready;
-
+	reg tb_cf_ready;
 
 	integer image_data [`WIDTH * `HEIGHT];
 	integer i, j;
@@ -48,7 +47,6 @@ module tb_rasterizer
 		(
 			.clk(tb_clk),
 			.n_rst(tb_n_rst),
-			.start(tb_start),
 			.itriangle(tb_i_triangle),
 			.icolor(tb_i_color),
 			.otriangle(tb_o_triangle),
@@ -58,7 +56,8 @@ module tb_rasterizer
 			.addr(tb_addr),
 			.done(tb_done),
 			.tri_read(tb_tri_read),
-			.tri_ready(tb_tri_ready)
+			.tri_ready(tb_tri_ready),
+			.cf_ready(tb_cf_ready)
 		);
 	
 	always @(posedge tb_clk) begin
@@ -116,8 +115,7 @@ module tb_rasterizer
 			tb_i_color.r = {$random(seed)} % 256;
 
 
-			tb_start = 0;
-		
+			tb_cf_ready = 1;	
 
 			tb_n_rst = 1;
 			#DELAY;

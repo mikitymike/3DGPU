@@ -48,7 +48,9 @@ module tb_colorloop
 	reg tb_write_en;
 	reg [(`LAYER_SIZE-1):0] tb_data_out;
 	Color tb_data_out_color;
-
+	reg tb_all_done;
+	reg tb_new_frame;
+	reg tb_ready;
 
 	reg [(`COLOR_BITS-1):0] image_data [`WIDTH*`HEIGHT]; //could not use integer
 	reg [(`LAYER_SIZE-1):0] zbuffer_data [`WIDTH*`HEIGHT];
@@ -83,7 +85,10 @@ module tb_colorloop
 			.fb_addr(tb_fb_addr),
 			.write_en(tb_write_en),
 			.data_out(tb_data_out),
-			.data_out_color(tb_data_out_color)
+			.data_out_color(tb_data_out_color),
+			.all_done(tb_all_done),
+			.new_frame(tb_new_frame),
+			.ready(tb_ready)
 		);
 	
 	always @(posedge tb_clk) begin
@@ -97,6 +102,8 @@ module tb_colorloop
 	end
 	
 	initial begin
+		tb_all_done = 1;
+		tb_new_frame = 1;
 		tb_n_rst = 1;
 		#DELAY;
 		tb_n_rst = 0;
@@ -196,6 +203,9 @@ module tb_colorloop
 		#DELAY;
 		tb_n_rst = 1;
 		$display("Starting process.\n");	
+		@(posedge tb_clk);
+		tb_new_frame = 0;
+		
 		@(negedge tb_clk);
 		tb_start = 1;
 

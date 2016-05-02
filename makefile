@@ -16,7 +16,7 @@ include /home/ecegrid/a/ece337/Course_Prod/course_make_vars
 # (do not include the source folder in the name)
 # NOTE: YOU WILL NEED TO SET THIS VARIABLE'S VALUE WHEN WORKING WITH HEIRARCHICAL DESIGNS
 # AND THE AUTOMATED GRADING SYSTEM
-COMPONENT_FILES	:= bresen.sv rasterizer_controller.sv ortho_proj.sv wireframe_plot.sv colorfill.sv z_interpolation colorloop.sv rasterizer.sv zbuffer_sram.sv frame_buffer_transfer.sv multi_channel_double_sram.sv cs_rcu.sv texel_assembler.sv bounds_check.sv clip_split.sv
+COMPONENT_FILES	:= bresen.sv rasterizer_controller.sv ortho_proj.sv wireframe_plot.sv colorfill.sv z_interpolation.sv colorloop.sv rasterizer.sv zbuffer_sram.sv frame_buffer_transfer.sv multi_channel_double_sram.sv cs_rcu.sv texel_assembler.sv bounds_check.sv clip_split.sv
 
 # Specify the name of the top level file (do not include the source folder in the name)
 # NOTE: YOU WILL NEED TO SET THIS VARIABLE'S VALUE WHEN WORKING WITH HEIRARCHICAL DESIGNS
@@ -43,7 +43,7 @@ M_WORK_LIB := mapped_work
 
 FPGA_MF_LIB := "/home/ecegrid/a/ece337/Course_Prod/FPGA_Libs/altera_mf_ver"
 
-LIB_CREATE	:= vlib
+LIB_CREATE		:= vlib
 COMPILE 		:= vlog -sv
 SIMULATE		:= vsim -Lf $(LABS_IP_LIB) -Lf $(FPGA_MF_LIB) -L $(GATE_LIB) -L $(GOLD_LIB) +no_glitch_msg -coverage -voptargs="+acc"
 DC_SHELL		:= dc_shell-t
